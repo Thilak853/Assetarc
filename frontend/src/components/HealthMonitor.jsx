@@ -1,1153 +1,842 @@
 
-
-
-// import React, {
-//   useCallback,
-//   useEffect,
-//   useMemo,
-//   useState,
-// } from "react";
-// import axios from "axios";
-
-// const API = "http://localhost:8080/api";
-
-// const HealthMonitor = () => {
-//   const [assets, setAssets] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   const getToken = () => {
-//     return (
-//       localStorage.getItem("token") ||
-//       localStorage.getItem("authToken")
-//     );
-//   };
-
-//   const getConfig = () => {
-//     const token = getToken();
-
-//     return token
-//       ? {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       : {};
-//   };
-
-//   const loadAssets = useCallback(
-//     async () => {
-//       try {
-//         setLoading(true);
-//         setError("");
-
-//         const response =
-//           await axios.get(
-//             `${API}/assets?page=0&size=1000`,
-//             getConfig()
-//           );
-
-//         const data = response.data;
-
-//         let list = [];
-
-//         if (Array.isArray(data)) {
-//           list = data;
-//         } else if (
-//           Array.isArray(data?.content)
-//         ) {
-//           list = data.content;
-//         } else if (
-//           Array.isArray(data?.data)
-//         ) {
-//           list = data.data;
-//         }
-
-//         setAssets(list);
-//       } catch (err) {
-//         console.error(
-//           "Health monitor error:",
-//           err
-//         );
-
-//         setError(
-//           err?.response?.data?.message ||
-//             err?.message ||
-//             "Unable to load asset health information."
-//         );
-
-//         setAssets([]);
-//       } finally {
-//         setLoading(false);
-//       }
-//     },
-//     []
-//   );
-
-//   useEffect(() => {
-//     loadAssets();
-//   }, [loadAssets]);
-
-//   const getHealth = (asset) => {
-//     const value =
-//       asset?.currentHealth ??
-//       asset?.health ??
-//       asset?.healthScore ??
-//       asset?.healthPercentage ??
-//       asset?.health_percentage;
-
-//     if (
-//       value === null ||
-//       value === undefined ||
-//       value === ""
-//     ) {
-//       return null;
-//     }
-
-//     const number = Number(value);
-
-//     return Number.isFinite(number)
-//       ? number
-//       : null;
-//   };
-
-//   const getStatus = (asset) => {
-//     return (
-//       asset?.currentStatus ??
-//       asset?.status ??
-//       "-"
-//     );
-//   };
-
-//   const getAssetTag = (asset) => {
-//     return (
-//       asset?.assetTag ??
-//       asset?.asset_tag ??
-//       asset?.tag ??
-//       "-"
-//     );
-//   };
-
-//   const getName = (asset) => {
-//     return asset?.name ?? "-";
-//   };
-
-//   const getCategory = (asset) => {
-//     return asset?.category ?? "-";
-//   };
-
-//   const activeAssets = useMemo(
-//     () =>
-//       assets.filter(
-//         (asset) =>
-//           String(
-//             getStatus(asset)
-//           ).toUpperCase() !==
-//           "DECOMMISSIONED"
-//       ),
-//     [assets]
-//   );
-
-//   const healthValues = activeAssets
-//     .map((asset) => getHealth(asset))
-//     .filter(
-//       (value) =>
-//         value !== null
-//     );
-
-//   const averageHealth =
-//     healthValues.length > 0
-//       ? Math.round(
-//           healthValues.reduce(
-//             (sum, value) =>
-//               sum + value,
-//             0
-//           ) /
-//             healthValues.length
-//         )
-//       : 0;
-
-//   const healthyCount =
-//     activeAssets.filter(
-//       (asset) => {
-//         const health =
-//           getHealth(asset);
-
-//         return (
-//           health !== null &&
-//           health >= 70
-//         );
-//       }
-//     ).length;
-
-//   const attentionCount =
-//     activeAssets.filter(
-//       (asset) => {
-//         const health =
-//           getHealth(asset);
-
-//         return (
-//           health !== null &&
-//           health >= 40 &&
-//           health < 70
-//         );
-//       }
-//     ).length;
-
-//   const criticalCount =
-//     activeAssets.filter(
-//       (asset) => {
-//         const health =
-//           getHealth(asset);
-
-//         return (
-//           health !== null &&
-//           health < 40
-//         );
-//       }
-//     ).length;
-
-//   const getHealthClass = (health) => {
-//     if (health === null) {
-//       return "unknown";
-//     }
-
-//     if (health >= 70) {
-//       return "healthy";
-//     }
-
-//     if (health >= 40) {
-//       return "warning";
-//     }
-
-//     return "critical";
-//   };
-
-//   const getHealthLabel = (health) => {
-//     if (health === null) {
-//       return "No Data";
-//     }
-
-//     if (health >= 70) {
-//       return "Healthy";
-//     }
-
-//     if (health >= 40) {
-//       return "Needs Attention";
-//     }
-
-//     return "Critical";
-//   };
-
-//   return (
-//     <div className="health-page page-container">
-
-//       {/* =========================
-//           HEADER
-//           ========================= */}
-
-//       <div className="health-page-header">
-
-//         <div>
-//           <span className="eyebrow">
-//             CONDITION MONITORING
-//           </span>
-
-//           <h1>
-//             Health Monitor
-//           </h1>
-
-//           <p>
-//             Real-time condition overview
-//             of industrial assets.
-//           </p>
-//         </div>
-
-//         <button
-//           type="button"
-//           className="add-btn refresh-btn"
-//           onClick={loadAssets}
-//           disabled={loading}
-//         >
-//           {loading
-//             ? "Refreshing..."
-//             : "Refresh"}
-//         </button>
-
-//       </div>
-
-
-//       {/* =========================
-//           SUMMARY
-//           ========================= */}
-
-//       <section className="health-summary-grid">
-
-//         <div className="health-summary-card">
-
-//           <span>
-//             Average Health
-//           </span>
-
-//           <strong>
-//             {averageHealth}%
-//           </strong>
-
-//         </div>
-
-
-//         <div className="health-summary-card">
-
-//           <span>
-//             Healthy
-//           </span>
-
-//           <strong className="healthy-number">
-//             {healthyCount}
-//           </strong>
-
-//         </div>
-
-
-//         <div className="health-summary-card">
-
-//           <span>
-//             Needs Attention
-//           </span>
-
-//           <strong className="warning-number">
-//             {attentionCount}
-//           </strong>
-
-//         </div>
-
-
-//         <div className="health-summary-card">
-
-//           <span>
-//             Critical
-//           </span>
-
-//           <strong className="critical-number">
-//             {criticalCount}
-//           </strong>
-
-//         </div>
-
-//       </section>
-
-
-//       {/* =========================
-//           GRAPH
-//           ========================= */}
-
-//       <section className="health-card">
-
-//         <div className="health-card-heading">
-
-//           <div>
-//             <span className="eyebrow">
-//               HEALTH ANALYTICS
-//             </span>
-
-//             <h2>
-//               Asset Health Distribution
-//             </h2>
-//           </div>
-
-//         </div>
-
-
-//         <div className="health-graph">
-
-//           <div className="health-axis">
-//             <span>100%</span>
-//             <span>75%</span>
-//             <span>50%</span>
-//             <span>25%</span>
-//             <span>0%</span>
-//           </div>
-
-
-//           <div className="health-bars">
-
-//             {activeAssets
-//               .slice(0, 20)
-//               .map(
-//                 (asset, index) => {
-
-//                   const health =
-//                     getHealth(asset) ??
-//                     0;
-
-//                   return (
-//                     <div
-//                       className="health-bar-column"
-//                       key={
-//                         asset?.id ??
-//                         asset?.assetId ??
-//                         index
-//                       }
-//                     >
-
-//                       <div className="health-bar-value">
-//                         {health}%
-//                       </div>
-
-//                       <div className="health-bar-track">
-
-//                         <div
-//                           className={`health-bar-fill ${getHealthClass(
-//                             health
-//                           )}`}
-//                           style={{
-//                             height:
-//                               `${Math.max(
-//                                 4,
-//                                 Math.min(
-//                                   100,
-//                                   health
-//                                 )
-//                               )}%`,
-//                           }}
-//                         ></div>
-
-//                       </div>
-
-//                       <span>
-//                         {getAssetTag(asset)}
-//                       </span>
-
-//                     </div>
-//                   );
-//                 }
-//               )}
-
-//           </div>
-
-//         </div>
-
-//       </section>
-
-
-//       {/* =========================
-//           TABLE
-//           ========================= */}
-
-//       <section className="health-card">
-
-//         <div className="health-card-heading">
-
-//           <div>
-//             <span className="eyebrow">
-//               ASSET HEALTH DETAILS
-//             </span>
-
-//             <h2>
-//               Industrial Asset Health
-//             </h2>
-
-//             <p>
-//               Current health condition of
-//               each industrial asset.
-//             </p>
-//           </div>
-
-//         </div>
-
-
-//         {error && (
-//           <div
-//             className="error-message"
-//             role="alert"
-//           >
-//             {error}
-//           </div>
-//         )}
-
-
-//         {loading ? (
-
-//           <div
-//             className="loading-spinner"
-//             role="status"
-//           >
-//             Loading health information...
-//           </div>
-
-//         ) : activeAssets.length === 0 ? (
-
-//           <div className="empty-state">
-//             No health data available.
-//           </div>
-
-//         ) : (
-
-//           <div className="health-table-wrapper">
-
-//             <table className="health-table">
-
-//               <thead>
-
-//                 <tr>
-//                   <th>Asset Tag</th>
-//                   <th>Asset Name</th>
-//                   <th>Category</th>
-//                   <th>Status</th>
-//                   <th>Health Score</th>
-//                   <th>Condition</th>
-//                   <th>Health Level</th>
-//                 </tr>
-
-//               </thead>
-
-
-//               <tbody>
-
-//                 {activeAssets.map(
-//                   (asset, index) => {
-
-//                     const health =
-//                       getHealth(asset);
-
-//                     const status =
-//                       getStatus(asset);
-
-//                     const healthClass =
-//                       getHealthClass(
-//                         health
-//                       );
-
-//                     return (
-//                       <tr
-//                         key={
-//                           asset?.id ??
-//                           asset?.assetId ??
-//                           index
-//                         }
-//                       >
-
-//                         <td>
-//                           <strong>
-//                             {getAssetTag(
-//                               asset
-//                             )}
-//                           </strong>
-//                         </td>
-
-
-//                         <td>
-//                           {getName(asset)}
-//                         </td>
-
-
-//                         <td>
-//                           {getCategory(
-//                             asset
-//                           )}
-//                         </td>
-
-
-//                         <td>
-//                           <span className="health-status-badge">
-//                             {String(
-//                               status
-//                             ).replace(
-//                               /_/g,
-//                               " "
-//                             )}
-//                           </span>
-//                         </td>
-
-
-//                         <td>
-
-//                           <div className="health-score-cell">
-
-//                             <strong
-//                               className={`health-score ${healthClass}`}
-//                             >
-//                               {health !== null
-//                                 ? `${health}%`
-//                                 : "N/A"}
-//                             </strong>
-
-//                             <div className="health-progress">
-
-//                               <span
-//                                 className={
-//                                   healthClass
-//                                 }
-//                                 style={{
-//                                   width:
-//                                     health !==
-//                                     null
-//                                       ? `${Math.max(
-//                                           0,
-//                                           Math.min(
-//                                             100,
-//                                             health
-//                                           )
-//                                         )}%`
-//                                       : "0%",
-//                                 }}
-//                               ></span>
-
-//                             </div>
-
-//                           </div>
-
-//                         </td>
-
-
-//                         <td>
-
-//                           <span
-//                             className={`condition-badge ${healthClass}`}
-//                           >
-//                             {getHealthLabel(
-//                               health
-//                             )}
-//                           </span>
-
-//                         </td>
-
-
-//                         <td>
-
-//                           <div className="health-meter">
-
-//                             <span
-//                               className={
-//                                 healthClass
-//                               }
-//                             ></span>
-
-//                             <span
-//                               className={
-//                                 healthClass
-//                               }
-//                             ></span>
-
-//                             <span
-//                               className={
-//                                 healthClass
-//                               }
-//                             ></span>
-
-//                             <span
-//                               className={
-//                                 healthClass
-//                               }
-//                             ></span>
-
-//                             <span
-//                               className={
-//                                 healthClass
-//                               }
-//                             ></span>
-
-//                           </div>
-
-//                         </td>
-
-//                       </tr>
-//                     );
-//                   }
-//                 )}
-
-//               </tbody>
-
-//             </table>
-
-//           </div>
-
-//         )}
-
-//       </section>
-
-//     </div>
-//   );
-// };
-
-// export default HealthMonitor;
-// // import React, {
-// //   useEffect,
-// //   useState,
-// // } from "react";
-
-// // import axios from "axios";
-
-// // const HealthMonitor = () => {
-
-// //   const [assets, setAssets] =
-// //     useState([]);
-
-// //   const [loading, setLoading] =
-// //     useState(true);
-
-// //   const loadHealth = async () => {
-
-// //     setLoading(true);
-
-// //     try {
-
-// //       const response =
-// //         await axios.get(
-// //           "http://localhost:8080/api/assets"
-// //         );
-
-// //       const data =
-// //         Array.isArray(response?.data)
-// //           ? response.data
-// //           : Array.isArray(response?.data?.content)
-// //           ? response.data.content
-// //           : [];
-
-// //       const formatted =
-// //         data.map(
-// //           (asset) => {
-
-// //             const health = Number(
-// //               asset?.currentHealth ??
-// //               asset?.health ??
-// //               asset?.healthScore ??
-// //               asset?.healthPercentage ??
-// //               0
-// //             );
-
-// //             return {
-// //               id:
-// //                 asset?.id ??
-// //                 asset?.assetId ??
-// //                 Math.random(),
-
-// //               tag:
-// //                 asset?.assetTag ??
-// //                 asset?.asset_tag ??
-// //                 asset?.tag ??
-// //                 "-",
-
-// //               name:
-// //                 asset?.name ??
-// //                 "-",
-
-// //               category:
-// //                 asset?.category ??
-// //                 "-",
-
-// //               status:
-// //                 asset?.currentStatus ??
-// //                 asset?.status ??
-// //                 "UNKNOWN",
-
-// //               health:
-// //                 Number.isFinite(health)
-// //                   ? Math.max(
-// //                       0,
-// //                       Math.min(
-// //                         100,
-// //                         health
-// //                       )
-// //                     )
-// //                   : 0,
-// //             };
-// //           }
-// //         );
-
-// //       setAssets(formatted);
-
-// //     } catch (error) {
-
-// //       /*
-// //        * Do not crash the page if
-// //        * backend is unavailable.
-// //        */
-// //       setAssets([]);
-
-// //     } finally {
-
-// //       setLoading(false);
-
-// //     }
-// //   };
-
-// //   useEffect(() => {
-// //     loadHealth();
-// //   }, []);
-
-// //   const total =
-// //     assets.length;
-
-// //   const average =
-// //     total > 0
-// //       ? Math.round(
-// //           assets.reduce(
-// //             (sum, asset) =>
-// //               sum + asset.health,
-// //             0
-// //           ) / total
-// //         )
-// //       : 0;
-
-// //   const healthy =
-// //     assets.filter(
-// //       (asset) =>
-// //         asset.health >= 70
-// //     ).length;
-
-// //   const attention =
-// //     assets.filter(
-// //       (asset) =>
-// //         asset.health >= 40 &&
-// //         asset.health < 70
-// //     ).length;
-
-// //   const critical =
-// //     assets.filter(
-// //       (asset) =>
-// //         asset.health < 40
-// //     ).length;
-
-// //   return (
-// //     <div className="health-page page-container">
-
-// //       {/* =========================
-// //           HEADER
-// //          ========================= */}
-
-// //       <div className="health-header">
-
-// //         <div>
-
-// //           <span className="eyebrow">
-// //             CONDITION MONITORING
-// //           </span>
-
-// //           <h1>
-// //             Health Monitor
-// //           </h1>
-
-// //           <p>
-// //             Real-time condition overview
-// //             of industrial assets.
-// //           </p>
-
-// //         </div>
-
-// //         <button
-// //           type="button"
-// //           className="add-btn"
-// //           onClick={loadHealth}
-// //         >
-// //           Refresh
-// //         </button>
-
-// //       </div>
-
-// //       {/* =========================
-// //           SUMMARY
-// //          ========================= */}
-
-// //       <section className="health-summary-grid">
-
-// //         <div className="health-stat-card">
-
-// //           <span>
-// //             Average Health
-// //           </span>
-
-// //           <strong>
-// //             {average}%
-// //           </strong>
-
-// //         </div>
-
-// //         <div className="health-stat-card">
-
-// //           <span>
-// //             Healthy
-// //           </span>
-
-// //           <strong>
-// //             {healthy}
-// //           </strong>
-
-// //         </div>
-
-// //         <div className="health-stat-card">
-
-// //           <span>
-// //             Needs Attention
-// //           </span>
-
-// //           <strong>
-// //             {attention}
-// //           </strong>
-
-// //         </div>
-
-// //         <div className="health-stat-card critical-health">
-
-// //           <span>
-// //             Critical
-// //           </span>
-
-// //           <strong>
-// //             {critical}
-// //           </strong>
-
-// //         </div>
-
-// //       </section>
-
-// //       {/* =========================
-// //           HEALTH GRAPH
-// //          ========================= */}
-
-// //       <section className="dashboard-card health-graph-card">
-
-// //         <div className="card-heading">
-
-// //           <div>
-
-// //             <span className="eyebrow">
-// //               HEALTH ANALYTICS
-// //             </span>
-
-// //             <h2>
-// //               Asset Health Distribution
-// //             </h2>
-
-// //           </div>
-
-// //         </div>
-
-// //         <div className="health-bars">
-
-// //           {assets.length === 0 ? (
-
-// //             <div className="empty-state">
-// //               No health data available.
-// //             </div>
-
-// //           ) : (
-
-// //             assets
-// //               .slice(0, 12)
-// //               .map(
-// //                 (asset) => (
-
-// //                   <div
-// //                     className="health-bar-item"
-// //                     key={asset.id}
-// //                   >
-
-// //                     <div className="health-bar-info">
-
-// //                       <strong>
-// //                         {asset.tag}
-// //                       </strong>
-
-// //                       <span>
-// //                         {asset.health}%
-// //                       </span>
-
-// //                     </div>
-
-// //                     <div className="health-bar-track">
-
-// //                       <div
-// //                         className={
-// //                           asset.health < 40
-// //                             ? "health-bar-fill critical"
-// //                             : asset.health < 70
-// //                             ? "health-bar-fill warning"
-// //                             : "health-bar-fill healthy"
-// //                         }
-// //                         style={{
-// //                           width:
-// //                             `${asset.health}%`,
-// //                         }}
-// //                       ></div>
-
-// //                     </div>
-
-// //                   </div>
-
-// //                 )
-// //               )
-
-// //           )}
-
-// //         </div>
-
-// //       </section>
-
-// //       {/* =========================
-// //           HEALTH TABLE
-// //          ========================= */}
-
-// //       <section className="dashboard-card full-card">
-
-// //         <div className="card-heading">
-
-// //           <div>
-
-// //             <span className="eyebrow">
-// //               CONDITION MONITORING
-// //             </span>
-
-// //             <h2>
-// //               Asset Health Details
-// //             </h2>
-
-// //           </div>
-
-// //         </div>
-
-// //         <div className="dashboard-table-wrapper">
-
-// //           <table className="health-table">
-
-// //             <thead>
-
-// //               <tr>
-// //                 <th>Asset Tag</th>
-// //                 <th>Asset Name</th>
-// //                 <th>Category</th>
-// //                 <th>Status</th>
-// //                 <th>Health Score</th>
-// //                 <th>Condition</th>
-// //               </tr>
-
-// //             </thead>
-
-// //             <tbody>
-
-// //               {loading ? (
-
-// //                 <tr>
-
-// //                   <td
-// //                     colSpan="6"
-// //                     className="table-loading"
-// //                   >
-// //                     Loading health data...
-// //                   </td>
-
-// //                 </tr>
-
-// //               ) : assets.length === 0 ? (
-
-// //                 <tr>
-
-// //                   <td
-// //                     colSpan="6"
-// //                     className="table-loading"
-// //                   >
-// //                     No health data available.
-// //                   </td>
-
-// //                 </tr>
-
-// //               ) : (
-
-// //                 assets.map(
-// //                   (asset) => {
-
-// //                     const healthClass =
-// //                       asset.health < 40
-// //                         ? "critical"
-// //                         : asset.health < 70
-// //                         ? "warning"
-// //                         : "healthy";
-
-// //                     return (
-// //                       <tr
-// //                         key={asset.id}
-// //                       >
-
-// //                         <td>
-// //                           <strong>
-// //                             {asset.tag}
-// //                           </strong>
-// //                         </td>
-
-// //                         <td>
-// //                           {asset.name}
-// //                         </td>
-
-// //                         <td>
-// //                           {asset.category}
-// //                         </td>
-
-// //                         <td>
-// //                           {asset.status}
-// //                         </td>
-
-// //                         <td>
-// //                           <strong>
-// //                             {asset.health}%
-// //                           </strong>
-// //                         </td>
-
-// //                         <td>
-
-// //                           <div className="health-condition">
-
-// //                             <span
-// //                               className={`condition-dot ${healthClass}`}
-// //                             ></span>
-
-// //                             <span>
-// //                               {healthClass ===
-// //                               "healthy"
-// //                                 ? "Healthy"
-// //                                 : healthClass ===
-// //                                   "warning"
-// //                                 ? "Needs Attention"
-// //                                 : "Critical"}
-// //                             </span>
-
-// //                           </div>
-
-// //                         </td>
-
-// //                       </tr>
-// //                     );
-// //                   }
-// //                 )
-
-// //               )}
-
-// //             </tbody>
-
-// //           </table>
-
-// //         </div>
-
-// //       </section>
-
-// //     </div>
-// //   );
-// // };
-
-// // export default HealthMonitor;
 import React, {
   useCallback,
   useEffect,
   useMemo,
-  useState
+  useState,
 } from "react";
 
 import axios from "axios";
 
-const API =
-  "http://localhost:8080/api";
+import {
+  useSelector,
+} from "react-redux";
 
+
+// ============================================================
+// API
+// ============================================================
+
+const API_BASE_URL = "http://localhost:8080/api";
+
+
+// ============================================================
+// INLINE STYLES
+// No HealthMonitor.css required
+// ============================================================
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    padding: "28px 32px 60px",
+    boxSizing: "border-box",
+    color: "#eaf7ff",
+    background:
+      "radial-gradient(circle at 15% 10%, rgba(0,170,255,.14), transparent 30%), radial-gradient(circle at 90% 25%, rgba(0,220,255,.10), transparent 30%), linear-gradient(135deg,#04101b,#071a29 50%,#03101a)",
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  container: {
+    width: "100%",
+    maxWidth: "1500px",
+    margin: "0 auto",
+    position: "relative",
+    zIndex: 2,
+  },
+
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: "20px",
+    marginBottom: "22px",
+  },
+
+  kicker: {
+    color: "#55d6ff",
+    fontSize: "11px",
+    fontWeight: 800,
+    letterSpacing: "3px",
+    textTransform: "uppercase",
+    marginBottom: "9px",
+  },
+
+  title: {
+    margin: 0,
+    color: "#ffffff",
+    fontSize: "38px",
+    lineHeight: 1.1,
+    fontWeight: 800,
+    letterSpacing: "-1.2px",
+  },
+
+  subtitle: {
+    margin: "9px 0 0",
+    color: "#88aabd",
+    fontSize: "13px",
+  },
+
+  headerRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+
+  live: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    color: "#69e6c5",
+    fontSize: "10px",
+    fontWeight: 800,
+    letterSpacing: "1px",
+  },
+
+  liveDot: {
+    width: "8px",
+    height: "8px",
+    borderRadius: "50%",
+    background: "#20e6bb",
+    boxShadow:
+      "0 0 8px #20e6bb, 0 0 20px rgba(32,230,187,.5)",
+  },
+
+  refreshButton: {
+    height: "36px",
+    padding: "0 15px",
+    border: "1px solid rgba(0,195,255,.25)",
+    borderRadius: "9px",
+    background:
+      "linear-gradient(135deg,#008cff,#00b9dd)",
+    color: "#fff",
+    fontSize: "10px",
+    fontWeight: 800,
+    cursor: "pointer",
+  },
+
+  banner: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "20px",
+    padding: "15px 20px",
+    marginBottom: "18px",
+    border:
+      "1px solid rgba(43,200,255,.20)",
+    borderRadius: "13px",
+    background:
+      "linear-gradient(90deg,rgba(0,150,190,.18),rgba(0,100,135,.35),rgba(0,190,230,.15))",
+    boxShadow:
+      "inset 0 0 30px rgba(0,190,255,.04)",
+  },
+
+  bannerLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+
+  bannerIcon: {
+    width: "34px",
+    height: "34px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "50%",
+    color: "#52e4c4",
+    background: "rgba(37,221,185,.12)",
+    fontSize: "17px",
+  },
+
+  bannerTitle: {
+    color: "#54e3c5",
+    fontSize: "10px",
+    fontWeight: 800,
+    letterSpacing: "1.5px",
+  },
+
+  bannerText: {
+    marginTop: "4px",
+    color: "#7ea4b7",
+    fontSize: "10px",
+  },
+
+  bannerRight: {
+    textAlign: "right",
+  },
+
+  autoTitle: {
+    color: "#d8f5ff",
+    fontSize: "10px",
+    fontWeight: 700,
+  },
+
+  autoText: {
+    marginTop: "4px",
+    color: "#5f8497",
+    fontSize: "9px",
+  },
+
+  stats: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(4,minmax(0,1fr))",
+    gap: "12px",
+    marginBottom: "22px",
+  },
+
+  statCard: {
+    position: "relative",
+    overflow: "hidden",
+    minHeight: "105px",
+    padding: "18px",
+    border:
+      "1px solid rgba(88,172,215,.16)",
+    borderRadius: "14px",
+    background:
+      "linear-gradient(145deg,rgba(15,39,56,.94),rgba(6,23,36,.97))",
+    boxShadow:
+      "0 18px 45px rgba(0,0,0,.22)",
+    boxSizing: "border-box",
+  },
+
+  statLabel: {
+    color: "#678b9e",
+    fontSize: "9px",
+    fontWeight: 800,
+    letterSpacing: "1px",
+    textTransform: "uppercase",
+  },
+
+  statValue: {
+    marginTop: "9px",
+    color: "#fff",
+    fontSize: "28px",
+    fontWeight: 800,
+  },
+
+  statSmall: {
+    marginTop: "5px",
+    color: "#63879a",
+    fontSize: "9px",
+  },
+
+  toolbar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "15px",
+    marginBottom: "14px",
+  },
+
+  search: {
+    width: "320px",
+    height: "40px",
+    padding: "0 14px",
+    boxSizing: "border-box",
+    outline: "none",
+    border:
+      "1px solid rgba(77,174,220,.20)",
+    borderRadius: "9px",
+    color: "#fff",
+    background: "rgba(8,28,43,.85)",
+    fontSize: "11px",
+  },
+
+  filters: {
+    display: "flex",
+    gap: "7px",
+    flexWrap: "wrap",
+  },
+
+  filterButton: {
+    height: "30px",
+    padding: "0 12px",
+    border:
+      "1px solid rgba(76,159,201,.20)",
+    borderRadius: "15px",
+    color: "#6e9aae",
+    background: "rgba(8,27,42,.8)",
+    fontSize: "8px",
+    fontWeight: 800,
+    cursor: "pointer",
+  },
+
+  sectionKicker: {
+    color: "#4fcfff",
+    fontSize: "8px",
+    fontWeight: 800,
+    letterSpacing: "2px",
+    textTransform: "uppercase",
+  },
+
+  sectionTitle: {
+    margin: "6px 0 12px",
+    color: "#fff",
+    fontSize: "18px",
+    fontWeight: 800,
+  },
+
+  tableContainer: {
+    width: "100%",
+    overflowX: "auto",
+    border:
+      "1px solid rgba(78,161,204,.15)",
+    borderRadius: "16px",
+    background:
+      "linear-gradient(145deg,rgba(9,30,46,.97),rgba(5,20,32,.99))",
+    boxShadow:
+      "0 25px 70px rgba(0,0,0,.30)",
+  },
+
+  table: {
+    width: "100%",
+    minWidth: "1180px",
+    borderCollapse: "collapse",
+  },
+
+  th: {
+    height: "48px",
+    padding: "0 14px",
+    color: "#78a5ba",
+    fontSize: "8px",
+    fontWeight: 800,
+    letterSpacing: ".8px",
+    textAlign: "left",
+    textTransform: "uppercase",
+    background: "rgba(16,50,70,.75)",
+    borderBottom:
+      "1px solid rgba(83,159,195,.12)",
+  },
+
+  td: {
+    height: "64px",
+    padding: "9px 14px",
+    color: "#b7cfda",
+    fontSize: "10px",
+    borderBottom:
+      "1px solid rgba(73,140,170,.09)",
+  },
+
+  tag: {
+    color: "#fff",
+    fontWeight: 800,
+  },
+
+  statusActive: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "5px 9px",
+    borderRadius: "12px",
+    color: "#49dfb9",
+    background: "rgba(40,220,170,.08)",
+    fontSize: "8px",
+    fontWeight: 800,
+  },
+
+  statusDecommissioned: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "5px 9px",
+    borderRadius: "12px",
+    color: "#ff7985",
+    background: "rgba(255,60,80,.08)",
+    fontSize: "8px",
+    fontWeight: 800,
+  },
+
+  statusDot: {
+    width: "5px",
+    height: "5px",
+    borderRadius: "50%",
+    background: "#3fe3b8",
+    boxShadow: "0 0 7px #3fe3b8",
+  },
+
+  scoreBox: {
+    minWidth: "120px",
+  },
+
+  scoreTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "5px",
+  },
+
+  score: {
+    color: "#45dfb5",
+    fontWeight: 800,
+  },
+
+  scoreUnavailable: {
+    color: "#718b99",
+    fontWeight: 700,
+    fontSize: "9px",
+  },
+
+  bar: {
+    height: "5px",
+    overflow: "hidden",
+    borderRadius: "10px",
+    background: "rgba(255,255,255,.08)",
+  },
+
+  barFill: {
+    height: "100%",
+    borderRadius: "10px",
+    background:
+      "linear-gradient(90deg,#1bc69c,#45e8be)",
+  },
+
+  conditionHealthy: {
+    color: "#47dfb7",
+    background: "rgba(36,215,170,.08)",
+  },
+
+  conditionWarning: {
+    color: "#ffd15a",
+    background: "rgba(255,198,65,.08)",
+  },
+
+  conditionCritical: {
+    color: "#ff6877",
+    background: "rgba(255,70,85,.08)",
+  },
+
+  conditionUnavailable: {
+    color: "#7694a4",
+    background: "rgba(120,150,165,.08)",
+  },
+
+  condition: {
+    display: "inline-flex",
+    padding: "5px 9px",
+    borderRadius: "8px",
+    fontSize: "8px",
+    fontWeight: 800,
+  },
+
+  healthLevel: {
+    fontSize: "8px",
+    fontWeight: 800,
+    letterSpacing: ".7px",
+  },
+
+  actions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+
+  action: {
+    height: "29px",
+    padding: "0 10px",
+    border:
+      "1px solid rgba(78,170,215,.22)",
+    borderRadius: "7px",
+    color: "#a7d8e9",
+    background: "rgba(10,36,52,.85)",
+    fontSize: "8px",
+    fontWeight: 800,
+    cursor: "pointer",
+  },
+
+  editAction: {
+    color: "#5fd6ff",
+  },
+
+  deleteAction: {
+    color: "#ff7180",
+    borderColor:
+      "rgba(255,80,95,.20)",
+  },
+
+  empty: {
+    minHeight: "230px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#6c8d9e",
+  },
+
+  emptyIcon: {
+    width: "55px",
+    height: "55px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "13px",
+    borderRadius: "15px",
+    color: "#52d5ff",
+    background: "rgba(0,170,255,.10)",
+    fontSize: "22px",
+  },
+
+  loading: {
+    minHeight: "250px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#78a6b9",
+    fontSize: "12px",
+  },
+
+  error: {
+    marginBottom: "14px",
+    padding: "12px 14px",
+    border:
+      "1px solid rgba(255,75,90,.22)",
+    borderRadius: "9px",
+    color: "#ff8995",
+    background: "rgba(100,15,25,.18)",
+    fontSize: "10px",
+  },
+
+  info: {
+    marginTop: "13px",
+    padding: "11px 15px",
+    border:
+      "1px solid rgba(69,145,183,.14)",
+    borderRadius: "8px",
+    color: "#61879a",
+    background: "rgba(7,26,40,.75)",
+    fontSize: "9px",
+  },
+
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 9999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "20px",
+    background: "rgba(1,8,14,.82)",
+    backdropFilter: "blur(10px)",
+  },
+
+  modal: {
+    width: "100%",
+    maxWidth: "540px",
+    maxHeight: "90vh",
+    overflowY: "auto",
+    padding: "27px",
+    boxSizing: "border-box",
+    border:
+      "1px solid rgba(69,185,235,.25)",
+    borderRadius: "18px",
+    background:
+      "linear-gradient(145deg,#0c2639,#061725)",
+    boxShadow:
+      "0 40px 100px rgba(0,0,0,.6)",
+  },
+
+  modalHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: "20px",
+    paddingBottom: "18px",
+    borderBottom:
+      "1px solid rgba(92,160,195,.13)",
+  },
+
+  modalKicker: {
+    color: "#50d5ff",
+    fontSize: "9px",
+    fontWeight: 800,
+    letterSpacing: "2px",
+  },
+
+  modalTitle: {
+    margin: "7px 0 0",
+    color: "#fff",
+    fontSize: "22px",
+  },
+
+  close: {
+    width: "32px",
+    height: "32px",
+    border:
+      "1px solid rgba(95,170,210,.2)",
+    borderRadius: "8px",
+    cursor: "pointer",
+    color: "#8db0c0",
+    background: "rgba(7,27,42,.8)",
+    fontSize: "17px",
+  },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "7px",
+  },
+
+  label: {
+    color: "#a9c3cf",
+    fontSize: "9px",
+    fontWeight: 800,
+  },
+
+  input: {
+    width: "100%",
+    height: "42px",
+    padding: "0 12px",
+    boxSizing: "border-box",
+    outline: "none",
+    border:
+      "1px solid rgba(77,161,200,.20)",
+    borderRadius: "8px",
+    color: "#fff",
+    background: "rgba(3,16,27,.8)",
+    fontSize: "11px",
+  },
+
+  select: {
+    width: "100%",
+    height: "42px",
+    padding: "0 12px",
+    boxSizing: "border-box",
+    outline: "none",
+    border:
+      "1px solid rgba(77,161,200,.20)",
+    borderRadius: "8px",
+    color: "#fff",
+    background: "rgba(3,16,27,.8)",
+    fontSize: "11px",
+  },
+
+  modalActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "9px",
+    marginTop: "7px",
+  },
+
+  cancel: {
+    height: "40px",
+    padding: "0 17px",
+    border:
+      "1px solid rgba(91,155,188,.22)",
+    borderRadius: "8px",
+    cursor: "pointer",
+    color: "#9bb8c5",
+    background: "rgba(8,27,40,.8)",
+    fontSize: "10px",
+    fontWeight: 700,
+  },
+
+  save: {
+    height: "40px",
+    padding: "0 20px",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    color: "#fff",
+    background:
+      "linear-gradient(90deg,#008dff,#00c3e9)",
+    fontSize: "10px",
+    fontWeight: 800,
+  },
+};
+
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+const getToken = () => {
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    ""
+  );
+};
+
+
+const getAuthConfig = () => {
+  const token = getToken();
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};
+
+
+const normalizeHealth = (asset) => {
+
+  if (!asset) {
+    return null;
+  }
+
+  const possibleValues = [
+    asset.currentHealth,
+    asset.healthScore,
+    asset.health,
+    asset.healthPercentage,
+    asset.health_score,
+    asset.current_health,
+  ];
+
+  for (const value of possibleValues) {
+
+    if (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      !Number.isNaN(Number(value))
+    ) {
+
+      const number =
+        Number(value);
+
+      if (number >= 0 && number <= 100) {
+        return number;
+      }
+    }
+  }
+
+  return null;
+};
+
+
+const getAssetTag = (asset) => {
+  return (
+    asset?.assetTag ||
+    asset?.asset_tag ||
+    asset?.tag ||
+    "—"
+  );
+};
+
+
+const getAssetName = (asset) => {
+  return (
+    asset?.name ||
+    asset?.assetName ||
+    asset?.asset_name ||
+    "Unnamed Asset"
+  );
+};
+
+
+const getCategory = (asset) => {
+  return (
+    asset?.category ||
+    asset?.assetCategory ||
+    "—"
+  );
+};
+
+
+const getStatus = (asset) => {
+
+  const status =
+    asset?.currentStatus ||
+    asset?.status ||
+    asset?.current_status ||
+    "ACTIVE";
+
+  return String(status).toUpperCase();
+};
+
+
+const getCondition = (health) => {
+
+  if (health === null) {
+    return "Metric unavailable";
+  }
+
+  if (health >= 80) {
+    return "Healthy";
+  }
+
+  if (health >= 50) {
+    return "Needs Attention";
+  }
+
+  return "Critical";
+};
+
+
+const getHealthLevel = (health) => {
+
+  if (health === null) {
+    return "—";
+  }
+
+  if (health >= 90) {
+    return "EXCELLENT";
+  }
+
+  if (health >= 75) {
+    return "GOOD";
+  }
+
+  if (health >= 50) {
+    return "ATTENTION";
+  }
+
+  return "CRITICAL";
+};
+
+
+// ============================================================
+// COMPONENT
+// ============================================================
 
 const HealthMonitor = () => {
+
+  const auth =
+    useSelector(
+      (state) => state.auth || {}
+    );
+
+
+  // ==========================================================
+  // ROLE
+  // ==========================================================
+
+  const role = String(
+    auth?.role ||
+    auth?.user?.role ||
+    localStorage.getItem("role") ||
+    ""
+  ).toUpperCase();
+
+
+  const canEditHealth =
+    role === "SYSTEM_ADMIN" ||
+    role === "ADMIN" ||
+    role === "ASSET_MANAGER" ||
+    role === "MAINTENANCE_TECHNICIAN";
+
+
+  const canDelete =
+    role === "SYSTEM_ADMIN" ||
+    role === "ADMIN" ||
+    role === "ASSET_MANAGER";
+
+
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
   const [assets, setAssets] =
     useState([]);
@@ -1155,55 +844,90 @@ const HealthMonitor = () => {
   const [loading, setLoading] =
     useState(true);
 
+  const [error, setError] =
+    useState("");
 
-  const loadHealth =
-    useCallback(async () => {
+  const [search, setSearch] =
+    useState("");
+
+  const [filter, setFilter] =
+    useState("ALL");
+
+  const [editingAsset, setEditingAsset] =
+    useState(null);
+
+  const [viewingAsset, setViewingAsset] =
+    useState(null);
+
+  const [saving, setSaving] =
+    useState(false);
+
+
+  const [form, setForm] =
+    useState({
+      healthScore: "",
+      condition: "",
+      healthLevel: "",
+    });
+
+
+  // ==========================================================
+  // FETCH ASSETS
+  // ==========================================================
+
+  const fetchAssets = useCallback(
+    async () => {
+
+      setLoading(true);
+      setError("");
 
       try {
 
-        const token =
-          localStorage.getItem(
-            "token"
-          ) ||
-          localStorage.getItem(
-            "authToken"
-          );
-
-        const config =
-          token
-            ? {
-                headers: {
-                  Authorization:
-                    `Bearer ${token}`
-                }
-              }
-            : {};
-
         const response =
           await axios.get(
-            `${API}/assets`,
-            config
+            `${API_BASE_URL}/assets`,
+            getAuthConfig()
           );
 
         const data =
-          Array.isArray(
-            response.data
-          )
-            ? response.data
-            : Array.isArray(
-                response.data?.content
-              )
-            ? response.data.content
-            : [];
+          response?.data;
 
-        setAssets(data);
+        if (Array.isArray(data)) {
 
-      } catch (error) {
+          setAssets(data);
+
+        } else if (
+          Array.isArray(data?.content)
+        ) {
+
+          setAssets(data.content);
+
+        } else if (
+          Array.isArray(data?.data)
+        ) {
+
+          setAssets(data.data);
+
+        } else {
+
+          setAssets([]);
+
+        }
+
+      } catch (err) {
 
         console.error(
-          "Health monitor error:",
-          error
+          "Health Monitor asset fetch error:",
+          err
         );
+
+        setError(
+          err?.response?.data?.message ||
+          err?.message ||
+          "Unable to load industrial assets."
+        );
+
+        setAssets([]);
 
       } finally {
 
@@ -1211,271 +935,988 @@ const HealthMonitor = () => {
 
       }
 
-    }, []);
+    },
+    []
+  );
 
+
+  // ==========================================================
+  // INITIAL LOAD + AUTO REFRESH
+  // ==========================================================
 
   useEffect(() => {
 
-    loadHealth();
+    fetchAssets();
 
     const timer =
       setInterval(
-        loadHealth,
+        fetchAssets,
         10000
       );
 
-    return () =>
+    return () => {
       clearInterval(timer);
-
-  }, [loadHealth]);
-
-
-  const getHealth =
-    (asset) => {
-
-      const value =
-        asset.currentHealth ??
-        asset.health ??
-        asset.healthScore ??
-        asset.healthPercentage ??
-        asset.health_percentage;
-
-      if (
-        value === null ||
-        value === undefined ||
-        value === ""
-      ) {
-        return null;
-      }
-
-      const number =
-        Number(value);
-
-      return Number.isFinite(number)
-        ? Math.max(
-            0,
-            Math.min(100, number)
-          )
-        : null;
     };
 
-
-  const getCondition =
-    (health) => {
-
-      if (health === null) {
-        return "Metric unavailable";
-      }
-
-      if (health >= 70) {
-        return "Healthy";
-      }
-
-      if (health >= 40) {
-        return "Warning";
-      }
-
-      return "Critical";
-    };
+  }, [fetchAssets]);
 
 
-  const getLevel =
-    (health) => {
+  // ==========================================================
+  // FILTER
+  // ==========================================================
 
-      if (health === null) {
-        return "—";
-      }
-
-      if (health >= 90) {
-        return "EXCELLENT";
-      }
-
-      if (health >= 70) {
-        return "GOOD";
-      }
-
-      if (health >= 40) {
-        return "MODERATE";
-      }
-
-      return "CRITICAL";
-    };
-
-
-  const averageHealth =
+  const filteredAssets =
     useMemo(() => {
 
-      const values =
-        assets
-          .map(getHealth)
-          .filter(
-            (v) => v !== null
+      const query =
+        search
+          .trim()
+          .toLowerCase();
+
+      return assets.filter(
+        (asset) => {
+
+          const tag =
+            getAssetTag(asset)
+              .toLowerCase();
+
+          const name =
+            getAssetName(asset)
+              .toLowerCase();
+
+          const category =
+            getCategory(asset)
+              .toLowerCase();
+
+          const status =
+            getStatus(asset);
+
+          const health =
+            normalizeHealth(asset);
+
+          const matchesSearch =
+            !query ||
+            tag.includes(query) ||
+            name.includes(query) ||
+            category.includes(query);
+
+          let matchesFilter = true;
+
+          if (filter === "HEALTHY") {
+            matchesFilter =
+              health !== null &&
+              health >= 80;
+          }
+
+          if (filter === "WARNING") {
+            matchesFilter =
+              health !== null &&
+              health >= 50 &&
+              health < 80;
+          }
+
+          if (filter === "CRITICAL") {
+            matchesFilter =
+              health !== null &&
+              health < 50;
+          }
+
+          if (filter === "NO_DATA") {
+            matchesFilter =
+              health === null;
+          }
+
+          if (filter === "ACTIVE") {
+            matchesFilter =
+              status === "ACTIVE";
+          }
+
+          if (filter === "DECOMMISSIONED") {
+            matchesFilter =
+              status === "DECOMMISSIONED";
+          }
+
+          return (
+            matchesSearch &&
+            matchesFilter
           );
 
-      if (!values.length) {
-        return null;
-      }
-
-      return Math.round(
-        values.reduce(
-          (a, b) => a + b,
-          0
-        ) / values.length
+        }
       );
+
+    }, [
+      assets,
+      search,
+      filter,
+    ]);
+
+
+  // ==========================================================
+  // STATISTICS
+  // ==========================================================
+
+  const statistics =
+    useMemo(() => {
+
+      const total =
+        assets.length;
+
+      const monitored =
+        assets.filter(
+          (asset) =>
+            normalizeHealth(asset) !== null
+        ).length;
+
+      const healthValues =
+        assets
+          .map(normalizeHealth)
+          .filter(
+            (value) =>
+              value !== null
+          );
+
+      const average =
+        healthValues.length > 0
+          ? Math.round(
+              healthValues.reduce(
+                (sum, value) =>
+                  sum + value,
+                0
+              ) /
+              healthValues.length
+            )
+          : 0;
+
+      const healthy =
+        healthValues.filter(
+          (value) =>
+            value >= 80
+        ).length;
+
+      const warning =
+        healthValues.filter(
+          (value) =>
+            value >= 50 &&
+            value < 80
+        ).length;
+
+      const critical =
+        healthValues.filter(
+          (value) =>
+            value < 50
+        ).length;
+
+      return {
+        total,
+        monitored,
+        average,
+        healthy,
+        warning,
+        critical,
+      };
 
     }, [assets]);
 
 
+  // ==========================================================
+  // OPEN EDIT
+  // ==========================================================
+
+  const openEdit =
+    (asset) => {
+
+      if (!canEditHealth) {
+        return;
+      }
+
+      const health =
+        normalizeHealth(asset);
+
+      setEditingAsset(asset);
+
+      setForm({
+        healthScore:
+          health === null
+            ? ""
+            : String(health),
+
+        condition:
+          getCondition(health),
+
+        healthLevel:
+          getHealthLevel(health),
+      });
+
+    };
+
+
+  // ==========================================================
+  // OPEN VIEW
+  // ==========================================================
+
+  const openView =
+    (asset) => {
+
+      setViewingAsset(asset);
+
+    };
+
+
+  // ==========================================================
+  // FORM CHANGE
+  // ==========================================================
+
+  const handleFormChange =
+    (event) => {
+
+      const {
+        name,
+        value,
+      } = event.target;
+
+      setForm(
+        (previous) => ({
+          ...previous,
+          [name]: value,
+        })
+      );
+
+    };
+
+
+  // ==========================================================
+  // AUTOMATIC CONDITION
+  // ==========================================================
+
+  const updateScore =
+    (value) => {
+
+      let health =
+        Number(value);
+
+      if (
+        value === "" ||
+        Number.isNaN(health)
+      ) {
+
+        setForm(
+          (previous) => ({
+            ...previous,
+            healthScore: value,
+          })
+        );
+
+        return;
+      }
+
+      health =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            health
+          )
+        );
+
+      let condition =
+        "Critical";
+
+      let healthLevel =
+        "CRITICAL";
+
+      if (health >= 90) {
+
+        condition = "Healthy";
+        healthLevel = "EXCELLENT";
+
+      } else if (health >= 75) {
+
+        condition = "Healthy";
+        healthLevel = "GOOD";
+
+      } else if (health >= 50) {
+
+        condition = "Needs Attention";
+        healthLevel = "ATTENTION";
+
+      }
+
+      setForm({
+        healthScore:
+          String(health),
+
+        condition,
+
+        healthLevel,
+      });
+
+    };
+
+
+  // ==========================================================
+  // SAVE HEALTH
+  // ==========================================================
+
+  const saveHealth =
+    async (event) => {
+
+      event.preventDefault();
+
+      if (!editingAsset) {
+        return;
+      }
+
+      const health =
+        Number(form.healthScore);
+
+      if (
+        Number.isNaN(health) ||
+        health < 0 ||
+        health > 100
+      ) {
+
+        alert(
+          "Health Score must be between 0 and 100."
+        );
+
+        return;
+      }
+
+      setSaving(true);
+
+      try {
+
+        const id =
+          editingAsset.id ||
+          editingAsset.assetId;
+
+        const payload = {
+          ...editingAsset,
+
+          currentHealth:
+            health,
+
+          healthScore:
+            health,
+
+          condition:
+            form.condition,
+
+          healthLevel:
+            form.healthLevel,
+        };
+
+
+        const response =
+          await axios.put(
+            `${API_BASE_URL}/assets/${id}`,
+            payload,
+            getAuthConfig()
+          );
+
+
+        const updated =
+          response?.data;
+
+        setAssets(
+          (previous) =>
+            previous.map(
+              (asset) => {
+
+                const assetId =
+                  asset.id ||
+                  asset.assetId;
+
+                if (
+                  String(assetId) ===
+                  String(id)
+                ) {
+
+                  return (
+                    updated ||
+                    payload
+                  );
+
+                }
+
+                return asset;
+
+              }
+            )
+        );
+
+
+        setEditingAsset(null);
+
+        alert(
+          "Asset health updated successfully."
+        );
+
+
+        await fetchAssets();
+
+      } catch (err) {
+
+        console.error(
+          "Health update error:",
+          err
+        );
+
+        alert(
+          err?.response?.data?.message ||
+          "Unable to update asset health."
+        );
+
+      } finally {
+
+        setSaving(false);
+
+      }
+
+    };
+
+
+  // ==========================================================
+  // DELETE ASSET
+  // ADMIN + MANAGER ONLY
+  // ==========================================================
+
+  const deleteAsset =
+    async (asset) => {
+
+      if (!canDelete) {
+        return;
+      }
+
+      const id =
+        asset.id ||
+        asset.assetId;
+
+      if (!id) {
+        return;
+      }
+
+      const confirmed =
+        window.confirm(
+          `Delete ${getAssetTag(asset)}?`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+
+        await axios.delete(
+          `${API_BASE_URL}/assets/${id}`,
+          getAuthConfig()
+        );
+
+        setAssets(
+          (previous) =>
+            previous.filter(
+              (item) => {
+
+                const itemId =
+                  item.id ||
+                  item.assetId;
+
+                return (
+                  String(itemId) !==
+                  String(id)
+                );
+
+              }
+            )
+        );
+
+        alert(
+          "Asset deleted successfully."
+        );
+
+      } catch (err) {
+
+        console.error(
+          "Delete asset error:",
+          err
+        );
+
+        alert(
+          err?.response?.data?.message ||
+          "Unable to delete asset."
+        );
+
+      }
+
+    };
+
+
+  // ==========================================================
+  // CONDITION CLASS
+  // ==========================================================
+
+  const getConditionStyle =
+    (health) => {
+
+      if (health === null) {
+        return {
+          ...styles.condition,
+          ...styles.conditionUnavailable,
+        };
+      }
+
+      if (health >= 80) {
+        return {
+          ...styles.condition,
+          ...styles.conditionHealthy,
+        };
+      }
+
+      if (health >= 50) {
+        return {
+          ...styles.condition,
+          ...styles.conditionWarning,
+        };
+      }
+
+      return {
+        ...styles.condition,
+        ...styles.conditionCritical,
+      };
+
+    };
+
+
+  // ==========================================================
+  // HEALTH LEVEL STYLE
+  // ==========================================================
+
+  const getLevelStyle =
+    (health) => {
+
+      if (health === null) {
+        return {
+          ...styles.healthLevel,
+          color: "#7694a4",
+        };
+      }
+
+      if (health >= 90) {
+        return {
+          ...styles.healthLevel,
+          color: "#45dfb5",
+        };
+      }
+
+      if (health >= 75) {
+        return {
+          ...styles.healthLevel,
+          color: "#8cdb62",
+        };
+      }
+
+      if (health >= 50) {
+        return {
+          ...styles.healthLevel,
+          color: "#ffd05a",
+        };
+      }
+
+      return {
+        ...styles.healthLevel,
+        color: "#ff6677",
+      };
+
+    };
+
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
 
-    <div className="page-container health-page">
+    <div style={styles.page}>
 
-      <div className="health-hero">
+      <div style={styles.container}>
 
-        <div>
+        {/* ==================================================
+            HEADER
+        ================================================== */}
 
-          <span className="eyebrow">
-            CONDITION MONITORING
-          </span>
-
-          <h1>
-            Industrial Asset Health
-          </h1>
-
-          <p>
-            Real-time equipment condition
-            and health intelligence.
-          </p>
-
-        </div>
-
-        <div className="health-live">
-          ● LIVE MONITORING
-        </div>
-
-      </div>
-
-
-      <div className="health-summary">
-
-        <div className="health-summary-card">
-
-          <span>
-            Fleet Average
-          </span>
-
-          <strong>
-
-            {averageHealth === null
-              ? "No metrics"
-              : `${averageHealth}%`}
-
-          </strong>
-
-        </div>
-
-
-        <div className="health-summary-card">
-
-          <span>
-            Monitored Assets
-          </span>
-
-          <strong>
-            {
-              assets.filter(
-                (asset) =>
-                  getHealth(asset) !==
-                  null
-              ).length
-            }
-          </strong>
-
-        </div>
-
-
-        <div className="health-summary-card">
-
-          <span>
-            Total Assets
-          </span>
-
-          <strong>
-            {assets.length}
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      <section className="health-table-card">
-
-        <div className="card-heading">
+        <header style={styles.header}>
 
           <div>
 
-            <span className="eyebrow">
-              ASSET HEALTH DETAILS
-            </span>
+            <div style={styles.kicker}>
+              CONDITION MONITORING
+            </div>
 
-            <h2>
-              Current Equipment Condition
-            </h2>
+            <h1 style={styles.title}>
+              Industrial Asset Health
+            </h1>
+
+            <p style={styles.subtitle}>
+              Real-time equipment condition
+              and health intelligence.
+            </p>
 
           </div>
 
-          <span>
-            Auto refresh: 10s
-          </span>
+
+          <div style={styles.headerRight}>
+
+            <div style={styles.live}>
+
+              <span style={styles.liveDot} />
+
+              LIVE MONITORING
+
+            </div>
+
+            <button
+              type="button"
+              style={styles.refreshButton}
+              onClick={fetchAssets}
+            >
+              ↻ Refresh
+            </button>
+
+          </div>
+
+        </header>
+
+
+        {/* ==================================================
+            MONITORING BANNER
+        ================================================== */}
+
+        <div style={styles.banner}>
+
+          <div style={styles.bannerLeft}>
+
+            <div style={styles.bannerIcon}>
+              ◉
+            </div>
+
+            <div>
+
+              <div style={styles.bannerTitle}>
+                LIVE MONITORING
+              </div>
+
+              <div style={styles.bannerText}>
+                Industrial equipment health
+                monitoring is active.
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div style={styles.bannerRight}>
+
+            <div style={styles.autoTitle}>
+              Auto refresh: 10s
+            </div>
+
+            <div style={styles.autoText}>
+              Last data refresh is automatic
+            </div>
+
+          </div>
 
         </div>
 
 
-        <div className="health-table-wrapper">
+        {/* ==================================================
+            STATISTICS
+        ================================================== */}
 
-          <table className="health-table">
-
-            <thead>
-
-              <tr>
-                <th>Asset Tag</th>
-                <th>Asset Name</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Health Score</th>
-                <th>Condition</th>
-                <th>Health Level</th>
-              </tr>
-
-            </thead>
+        <div style={styles.stats}>
 
 
-            <tbody>
+          <div style={styles.statCard}>
 
-              {loading ? (
+            <div style={styles.statLabel}>
+              Fleet Average
+            </div>
+
+            <div style={styles.statValue}>
+              {statistics.average}%
+            </div>
+
+            <div style={styles.statSmall}>
+              Average monitored health
+            </div>
+
+          </div>
+
+
+          <div style={styles.statCard}>
+
+            <div style={styles.statLabel}>
+              Monitored Assets
+            </div>
+
+            <div style={styles.statValue}>
+              {statistics.monitored}
+            </div>
+
+            <div style={styles.statSmall}>
+              Assets with health metrics
+            </div>
+
+          </div>
+
+
+          <div style={styles.statCard}>
+
+            <div style={styles.statLabel}>
+              Total Assets
+            </div>
+
+            <div style={styles.statValue}>
+              {statistics.total}
+            </div>
+
+            <div style={styles.statSmall}>
+              Registered industrial assets
+            </div>
+
+          </div>
+
+
+          <div style={styles.statCard}>
+
+            <div style={styles.statLabel}>
+              Healthy Assets
+            </div>
+
+            <div style={{
+              ...styles.statValue,
+              color: "#45dfb5",
+            }}>
+              {statistics.healthy}
+            </div>
+
+            <div style={styles.statSmall}>
+              80% or higher
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* ==================================================
+            ERROR
+        ================================================== */}
+
+        {error && (
+
+          <div style={styles.error}>
+            {error}
+          </div>
+
+        )}
+
+
+        {/* ==================================================
+            TOOLBAR
+        ================================================== */}
+
+        <div style={styles.toolbar}>
+
+          <input
+            type="text"
+            placeholder="Search by tag or name..."
+            value={search}
+            onChange={(event) =>
+              setSearch(
+                event.target.value
+              )
+            }
+            style={styles.search}
+          />
+
+
+          <div style={styles.filters}>
+
+            {[
+              ["ALL", "All"],
+              ["HEALTHY", "Healthy"],
+              ["WARNING", "Warning"],
+              ["CRITICAL", "Critical"],
+              ["NO_DATA", "No Data"],
+              ["ACTIVE", "Active"],
+              [
+                "DECOMMISSIONED",
+                "Decommissioned",
+              ],
+            ].map(
+              ([value, label]) => (
+
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() =>
+                    setFilter(value)
+                  }
+                  style={{
+                    ...styles.filterButton,
+                    ...(filter === value
+                      ? {
+                          color: "#fff",
+                          borderColor:
+                            "#00c7ff",
+                          background:
+                            "linear-gradient(135deg,rgba(0,146,220,.7),rgba(0,202,238,.5))",
+                        }
+                      : {}),
+                  }}
+                >
+                  {label}
+                </button>
+
+              )
+            )}
+
+          </div>
+
+        </div>
+
+
+        {/* ==================================================
+            SECTION
+        ================================================== */}
+
+        <div>
+
+          <div style={styles.sectionKicker}>
+            ASSET HEALTH DETAILS
+          </div>
+
+          <h2 style={styles.sectionTitle}>
+            Current Equipment Condition
+          </h2>
+
+        </div>
+
+
+        {/* ==================================================
+            LOADING
+        ================================================== */}
+
+        {loading ? (
+
+          <div style={styles.tableContainer}>
+
+            <div style={styles.loading}>
+              Loading industrial asset health data...
+            </div>
+
+          </div>
+
+        ) : filteredAssets.length === 0 ? (
+
+          <div style={styles.tableContainer}>
+
+            <div style={styles.empty}>
+
+              <div style={styles.emptyIcon}>
+                ◌
+              </div>
+
+              <strong
+                style={{
+                  color: "#fff",
+                  fontSize: "15px",
+                }}
+              >
+                No Asset Data
+              </strong>
+
+              <span
+                style={{
+                  marginTop: "7px",
+                  fontSize: "10px",
+                }}
+              >
+                No industrial assets match
+                the selected filter.
+              </span>
+
+            </div>
+
+          </div>
+
+        ) : (
+
+          /* ==================================================
+             TABLE
+          ================================================== */
+
+          <div style={styles.tableContainer}>
+
+            <table style={styles.table}>
+
+              <thead>
 
                 <tr>
-                  <td colSpan="7">
-                    Loading health data...
-                  </td>
+
+                  <th style={styles.th}>
+                    Asset Tag
+                  </th>
+
+                  <th style={styles.th}>
+                    Asset Name
+                  </th>
+
+                  <th style={styles.th}>
+                    Category
+                  </th>
+
+                  <th style={styles.th}>
+                    Status
+                  </th>
+
+                  <th style={styles.th}>
+                    Health Score
+                  </th>
+
+                  <th style={styles.th}>
+                    Condition
+                  </th>
+
+                  <th style={styles.th}>
+                    Health Level
+                  </th>
+
+                  <th style={styles.th}>
+                    Actions
+                  </th>
+
                 </tr>
 
-              ) : assets.length === 0 ? (
+              </thead>
 
-                <tr>
-                  <td colSpan="7">
-                    No assets available.
-                  </td>
-                </tr>
 
-              ) : (
+              <tbody>
 
-                assets.map(
+                {filteredAssets.map(
                   (asset, index) => {
 
                     const health =
-                      getHealth(asset);
+                      normalizeHealth(
+                        asset
+                      );
+
+                    const status =
+                      getStatus(
+                        asset
+                      );
 
                     const condition =
                       getCondition(
@@ -1483,86 +1924,92 @@ const HealthMonitor = () => {
                       );
 
                     const level =
-                      getLevel(
+                      getHealthLevel(
                         health
                       );
-
-                    const tag =
-                      asset.assetTag ??
-                      asset.asset_tag ??
-                      "-";
-
-                    const name =
-                      asset.name ??
-                      "-";
-
-                    const category =
-                      asset.category ??
-                      "-";
-
-                    const status =
-                      asset.currentStatus ??
-                      asset.status ??
-                      "-";
-
 
                     return (
 
                       <tr
                         key={
-                          asset.id ??
-                          asset.assetId ??
-                          index
+                          asset.id ||
+                          asset.assetId ||
+                          `${getAssetTag(asset)}-${index}`
                         }
                       >
 
-                        <td>
-                          <strong>
-                            {tag}
-                          </strong>
-                        </td>
+                        {/* TAG */}
 
-                        <td>
-                          {name}
-                        </td>
+                        <td style={styles.td}>
 
-                        <td>
-                          {category}
-                        </td>
-
-                        <td>
-                          <span className="status-pill">
-                            {status}
+                          <span style={styles.tag}>
+                            {getAssetTag(asset)}
                           </span>
+
                         </td>
 
-                        <td>
 
-                          {health !== null ? (
+                        {/* NAME */}
 
-                            <div className="health-value">
+                        <td style={styles.td}>
 
-                              <strong>
-                                {health}%
-                              </strong>
+                          {getAssetName(asset)}
 
-                              <div className="health-progress">
+                        </td>
 
-                                <div
-                                  style={{
-                                    width:
-                                      `${health}%`
-                                  }}
-                                />
 
-                              </div>
+                        {/* CATEGORY */}
 
-                            </div>
+                        <td style={styles.td}>
+
+                          {getCategory(asset)}
+
+                        </td>
+
+
+                        {/* STATUS */}
+
+                        <td style={styles.td}>
+
+                          {status ===
+                          "DECOMMISSIONED" ? (
+
+                            <span
+                              style={
+                                styles.statusDecommissioned
+                              }
+                            >
+
+                              <span
+                                style={{
+                                  ...styles.statusDot,
+                                  background:
+                                    "#ff5b6b",
+                                  boxShadow:
+                                    "0 0 7px #ff5b6b",
+                                }}
+                              />
+
+                              DECOMMISSIONED
+
+                            </span>
 
                           ) : (
 
-                            <span className="metric-unavailable">
-                              Metric unavailable
+                            <span
+                              style={
+                                styles.statusActive
+                              }
+                            >
+
+                              <span
+                                style={
+                                  styles.statusDot
+                                }
+                              />
+
+                              {status}
+
                             </span>
 
                           )}
@@ -1570,29 +2017,176 @@ const HealthMonitor = () => {
                         </td>
 
 
-                        <td>
+                        {/* HEALTH */}
+
+                        <td style={styles.td}>
+
+                          {health === null ? (
+
+                            <span
+                              style={
+                                styles.scoreUnavailable
+                              }
+                            >
+                              Metric unavailable
+                            </span>
+
+                          ) : (
+
+                            <div
+                              style={
+                                styles.scoreBox
+                              }
+                            >
+
+                              <div
+                                style={
+                                  styles.scoreTop
+                                }
+                              >
+
+                                <span
+                                  style={
+                                    styles.score
+                                  }
+                                >
+                                  {health}%
+                                </span>
+
+                              </div>
+
+                              <div
+                                style={
+                                  styles.bar
+                                }
+                              >
+
+                                <div
+                                  style={{
+                                    ...styles.barFill,
+                                    width:
+                                      `${health}%`,
+                                  }}
+                                />
+
+                              </div>
+
+                            </div>
+
+                          )}
+
+                        </td>
+
+
+                        {/* CONDITION */}
+
+                        <td style={styles.td}>
 
                           <span
-                            className={
-                              `condition condition-${condition
-                                .toLowerCase()
-                                .replace(
-                                  /\s/g,
-                                  "-"
-                                )}`
+                            style={
+                              getConditionStyle(
+                                health
+                              )
                             }
                           >
+
                             {condition}
+
                           </span>
 
                         </td>
 
 
-                        <td>
+                        {/* LEVEL */}
 
-                          <strong>
+                        <td style={styles.td}>
+
+                          <span
+                            style={
+                              getLevelStyle(
+                                health
+                              )
+                            }
+                          >
+
                             {level}
-                          </strong>
+
+                          </span>
+
+                        </td>
+
+
+                        {/* ACTIONS */}
+
+                        <td style={styles.td}>
+
+                          <div
+                            style={
+                              styles.actions
+                            }
+                          >
+
+                            {/* VIEW */}
+
+                            <button
+                              type="button"
+                              style={
+                                styles.action
+                              }
+                              onClick={() =>
+                                openView(
+                                  asset
+                                )
+                              }
+                            >
+                              View
+                            </button>
+
+
+                            {/* EDIT */}
+
+                            {canEditHealth && (
+
+                              <button
+                                type="button"
+                                style={{
+                                  ...styles.action,
+                                  ...styles.editAction,
+                                }}
+                                onClick={() =>
+                                  openEdit(
+                                    asset
+                                  )
+                                }
+                              >
+                                Edit
+                              </button>
+
+                            )}
+
+
+                            {/* DELETE */}
+
+                            {canDelete && (
+
+                              <button
+                                type="button"
+                                style={{
+                                  ...styles.action,
+                                  ...styles.deleteAction,
+                                }}
+                                onClick={() =>
+                                  deleteAsset(
+                                    asset
+                                  )
+                                }
+                              >
+                                Delete
+                              </button>
+
+                            )}
+
+                          </div>
 
                         </td>
 
@@ -1601,17 +2195,575 @@ const HealthMonitor = () => {
                     );
 
                   }
-                )
+                )}
 
-              )}
+              </tbody>
 
-            </tbody>
+            </table>
 
-          </table>
+          </div>
+
+        )}
+
+
+        {/* ==================================================
+            INFO
+        ================================================== */}
+
+        <div style={styles.info}>
+
+          <strong>
+            Health access:
+          </strong>{" "}
+
+          {canEditHealth
+            ? "You can edit health score, condition and health level."
+            : "Health editing is restricted to authorized maintenance roles."}
+
+          {canDelete &&
+            " Asset deletion is available to administrators and asset managers."}
 
         </div>
 
-      </section>
+      </div>
+
+
+      {/* ====================================================
+          VIEW MODAL
+      ==================================================== */}
+
+      {viewingAsset && (
+
+        <div
+          style={styles.overlay}
+          onClick={() =>
+            setViewingAsset(null)
+          }
+        >
+
+          <div
+            style={styles.modal}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div
+              style={
+                styles.modalHeader
+              }
+            >
+
+              <div>
+
+                <div
+                  style={
+                    styles.modalKicker
+                  }
+                >
+                  ASSET HEALTH DETAILS
+                </div>
+
+                <h2
+                  style={
+                    styles.modalTitle
+                  }
+                >
+                  {getAssetTag(
+                    viewingAsset
+                  )}
+                </h2>
+
+              </div>
+
+
+              <button
+                type="button"
+                style={styles.close}
+                onClick={() =>
+                  setViewingAsset(null)
+                }
+              >
+                ×
+              </button>
+
+            </div>
+
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr",
+                gap: "12px",
+              }}
+            >
+
+              <div>
+
+                <div
+                  style={styles.label}
+                >
+                  ASSET NAME
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#fff",
+                    fontSize: "12px",
+                  }}
+                >
+                  {getAssetName(
+                    viewingAsset
+                  )}
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  style={styles.label}
+                >
+                  CATEGORY
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#fff",
+                    fontSize: "12px",
+                  }}
+                >
+                  {getCategory(
+                    viewingAsset
+                  )}
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  style={styles.label}
+                >
+                  STATUS
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#45dfb5",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {getStatus(
+                    viewingAsset
+                  )}
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  style={styles.label}
+                >
+                  HEALTH SCORE
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#fff",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {normalizeHealth(
+                    viewingAsset
+                  ) !== null
+                    ? `${normalizeHealth(
+                        viewingAsset
+                      )}%`
+                    : "Metric unavailable"}
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  style={styles.label}
+                >
+                  CONDITION
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#45dfb5",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {getCondition(
+                    normalizeHealth(
+                      viewingAsset
+                    )
+                  )}
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  style={styles.label}
+                >
+                  HEALTH LEVEL
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "7px",
+                    color: "#45dfb5",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {getHealthLevel(
+                    normalizeHealth(
+                      viewingAsset
+                    )
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div
+              style={{
+                ...styles.modalActions,
+                marginTop: "25px",
+              }}
+            >
+
+              {canEditHealth && (
+
+                <button
+                  type="button"
+                  style={{
+                    ...styles.save,
+                    background:
+                      "linear-gradient(90deg,#008dff,#00c3e9)",
+                  }}
+                  onClick={() => {
+
+                    const asset =
+                      viewingAsset;
+
+                    setViewingAsset(
+                      null
+                    );
+
+                    openEdit(
+                      asset
+                    );
+
+                  }}
+                >
+                  Edit Health
+                </button>
+
+              )}
+
+              <button
+                type="button"
+                style={styles.cancel}
+                onClick={() =>
+                  setViewingAsset(null)
+                }
+              >
+                Close
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+
+      {/* ====================================================
+          EDIT MODAL
+      ==================================================== */}
+
+      {editingAsset && (
+
+        <div
+          style={styles.overlay}
+          onClick={() =>
+            !saving &&
+            setEditingAsset(null)
+          }
+        >
+
+          <div
+            style={styles.modal}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div
+              style={
+                styles.modalHeader
+              }
+            >
+
+              <div>
+
+                <div
+                  style={
+                    styles.modalKicker
+                  }
+                >
+                  HEALTH MANAGEMENT
+                </div>
+
+                <h2
+                  style={
+                    styles.modalTitle
+                  }
+                >
+                  Edit Asset Health
+                </h2>
+
+              </div>
+
+
+              <button
+                type="button"
+                style={styles.close}
+                disabled={saving}
+                onClick={() =>
+                  setEditingAsset(null)
+                }
+              >
+                ×
+              </button>
+
+            </div>
+
+
+            <form
+              style={styles.form}
+              onSubmit={saveHealth}
+            >
+
+              {/* ASSET */}
+
+              <div
+                style={styles.formGroup}
+              >
+
+                <label
+                  style={styles.label}
+                >
+                  ASSET
+                </label>
+
+                <input
+                  type="text"
+                  value={
+                    `${getAssetTag(
+                      editingAsset
+                    )} - ${getAssetName(
+                      editingAsset
+                    )}`
+                  }
+                  readOnly
+                  style={{
+                    ...styles.input,
+                    opacity: 0.7,
+                  }}
+                />
+
+              </div>
+
+
+              {/* HEALTH SCORE */}
+
+              <div
+                style={styles.formGroup}
+              >
+
+                <label
+                  style={styles.label}
+                >
+                  HEALTH SCORE (%)
+                </label>
+
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  name="healthScore"
+                  value={
+                    form.healthScore
+                  }
+                  onChange={(event) =>
+                    updateScore(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Enter health score"
+                  style={styles.input}
+                  required
+                />
+
+              </div>
+
+
+              {/* CONDITION */}
+
+              <div
+                style={styles.formGroup}
+              >
+
+                <label
+                  style={styles.label}
+                >
+                  CONDITION
+                </label>
+
+                <select
+                  name="condition"
+                  value={
+                    form.condition
+                  }
+                  onChange={
+                    handleFormChange
+                  }
+                  style={styles.select}
+                >
+
+                  <option value="Healthy">
+                    Healthy
+                  </option>
+
+                  <option value="Needs Attention">
+                    Needs Attention
+                  </option>
+
+                  <option value="Critical">
+                    Critical
+                  </option>
+
+                  <option value="Metric unavailable">
+                    Metric unavailable
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              {/* HEALTH LEVEL */}
+
+              <div
+                style={styles.formGroup}
+              >
+
+                <label
+                  style={styles.label}
+                >
+                  HEALTH LEVEL
+                </label>
+
+                <select
+                  name="healthLevel"
+                  value={
+                    form.healthLevel
+                  }
+                  onChange={
+                    handleFormChange
+                  }
+                  style={styles.select}
+                >
+
+                  <option value="EXCELLENT">
+                    EXCELLENT
+                  </option>
+
+                  <option value="GOOD">
+                    GOOD
+                  </option>
+
+                  <option value="ATTENTION">
+                    ATTENTION
+                  </option>
+
+                  <option value="CRITICAL">
+                    CRITICAL
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              {/* BUTTONS */}
+
+              <div
+                style={
+                  styles.modalActions
+                }
+              >
+
+                <button
+                  type="button"
+                  style={styles.cancel}
+                  disabled={saving}
+                  onClick={() =>
+                    setEditingAsset(null)
+                  }
+                >
+                  Cancel
+                </button>
+
+
+                <button
+                  type="submit"
+                  style={styles.save}
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Saving..."
+                    : "Save Health"}
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+
+      )}
 
     </div>
   );

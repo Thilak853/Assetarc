@@ -1,1208 +1,334 @@
 
 
-
-
-// // import React, { useEffect, useState } from "react";
-// // import { useDispatch, useSelector } from "react-redux";
-// // import {
-// //   fetchSchedules,
-// //   createSchedule,
-// // } from "../../store/slices/maintenanceSlice";
-// // import ScheduleMaintenanceModal from "./ScheduleMaintenanceModal";
-// // import LogMaintenanceModal from "./LogMaintenanceModal";
-
-// // const MaintenanceScheduler = () => {
-// //   const dispatch = useDispatch();
-
-// //   const maintenance = useSelector(
-// //     (state) => state.maintenance || {}
-// //   );
-
-// //   const auth = useSelector(
-// //     (state) => state.auth || {}
-// //   );
-
-// //   const schedules = Array.isArray(
-// //     maintenance.schedules
-// //   )
-// //     ? maintenance.schedules
-// //     : [];
-
-// //   const loading =
-// //     maintenance.loading === true;
-
-// //   const error =
-// //     maintenance.error;
-
-// //   const [showScheduleModal, setShowScheduleModal] =
-// //     useState(false);
-
-// //   const [showLogModal, setShowLogModal] =
-// //     useState(false);
-
-// //   const [selectedSchedule, setSelectedSchedule] =
-// //     useState(null);
-
-// //   const [search, setSearch] =
-// //     useState("");
-
-// //   const role = String(
-// //     auth.role ||
-// //       auth.user?.role ||
-// //       localStorage.getItem("role") ||
-// //       ""
-// //   ).toUpperCase();
-
-// //   const isAdmin = [
-// //     "ADMIN",
-// //     "ADMINISTRATOR",
-// //     "SUPER_ADMIN",
-// //   ].includes(role);
-
-// //   const isAssetManager =
-// //     role === "ASSET_MANAGER";
-
-// //   const isTechnician =
-// //     role === "TECHNICIAN";
-
-// //   const canSchedule =
-// //     isAdmin ||
-// //     isAssetManager;
-
-// //   const canComplete =
-// //     isAdmin ||
-// //     isTechnician;
-
-// //   useEffect(() => {
-// //     /*
-// //      * Load maintenance schedules only once.
-// //      * This prevents repeated API calls when Redux state changes.
-// //      */
-// //     if (
-// //       schedules.length === 0 &&
-// //       !loading
-// //     ) {
-// //       dispatch(fetchSchedules());
-// //     }
-// //   }, [
-// //     dispatch,
-// //     schedules.length,
-// //     loading,
-// //   ]);
-
-// //   const refreshSchedules = () => {
-// //     dispatch(fetchSchedules());
-// //   };
-
-// //   const handleOpenSchedule = () => {
-// //     setShowScheduleModal(true);
-// //   };
-
-// //   const handleCloseSchedule = () => {
-// //     setShowScheduleModal(false);
-// //   };
-
-// //   const handleOpenLog = (schedule) => {
-// //     setSelectedSchedule(schedule);
-// //     setShowLogModal(true);
-// //   };
-
-// //   const handleCloseLog = () => {
-// //     setShowLogModal(false);
-// //     setSelectedSchedule(null);
-// //   };
-
-// //   const handleScheduleSuccess = () => {
-// //     setShowScheduleModal(false);
-// //     refreshSchedules();
-// //   };
-
-// //   const handleMaintenanceSuccess = () => {
-// //     setShowLogModal(false);
-// //     setSelectedSchedule(null);
-// //     refreshSchedules();
-// //   };
-
-// //   const getAssetId = (schedule) => {
-// //     return (
-// //       schedule?.assetId ??
-// //       schedule?.asset?.id ??
-// //       schedule?.asset?.assetId ??
-// //       schedule?.industrialAssetId ??
-// //       "-"
-// //     );
-// //   };
-
-// //   const getAssetTag = (schedule) => {
-// //     return (
-// //       schedule?.assetTag ??
-// //       schedule?.asset?.assetTag ??
-// //       schedule?.asset?.asset_tag ??
-// //       `ASSET-${getAssetId(schedule)}`
-// //     );
-// //   };
-
-// //   const getAssetName = (schedule) => {
-// //     return (
-// //       schedule?.assetName ??
-// //       schedule?.asset?.name ??
-// //       schedule?.name ??
-// //       "Industrial Asset"
-// //     );
-// //   };
-
-// //   const getMaintenanceType = (schedule) => {
-// //     return (
-// //       schedule?.maintenanceType ??
-// //       schedule?.type ??
-// //       "-"
-// //     );
-// //   };
-
-// //   const getPriority = (schedule) => {
-// //     return (
-// //       schedule?.priority ??
-// //       "MEDIUM"
-// //     );
-// //   };
-
-// //   const getDate = (schedule) => {
-// //     return (
-// //       schedule?.plannedDate ??
-// //       schedule?.scheduledDate ??
-// //       schedule?.date ??
-// //       "-"
-// //     );
-// //   };
-
-// //   const getStatus = (schedule) => {
-// //     return (
-// //       schedule?.status ??
-// //       schedule?.scheduleStatus ??
-// //       "SCHEDULED"
-// //     );
-// //   };
-
-// //   const filteredSchedules =
-// //     schedules.filter((schedule) => {
-// //       const query =
-// //         search.trim().toLowerCase();
-
-// //       if (!query) {
-// //         return true;
-// //       }
-
-// //       const text = [
-// //         getAssetId(schedule),
-// //         getAssetTag(schedule),
-// //         getAssetName(schedule),
-// //         getMaintenanceType(schedule),
-// //         getPriority(schedule),
-// //         getStatus(schedule),
-// //       ]
-// //         .join(" ")
-// //         .toLowerCase();
-
-// //       return text.includes(query);
-// //     });
-
-// //   const getPriorityClass = (priority) => {
-// //     const value = String(
-// //       priority || ""
-// //     ).toLowerCase();
-
-// //     if (value === "high") {
-// //       return "priority-high";
-// //     }
-
-// //     if (value === "critical") {
-// //       return "priority-critical";
-// //     }
-
-// //     if (value === "low") {
-// //       return "priority-low";
-// //     }
-
-// //     return "priority-medium";
-// //   };
-
-// //   const getStatusClass = (status) => {
-// //     const value = String(
-// //       status || ""
-// //     ).toLowerCase();
-
-// //     if (
-// //       value.includes("complete") ||
-// //       value.includes("completed")
-// //     ) {
-// //       return "status-completed";
-// //     }
-
-// //     if (
-// //       value.includes("cancel")
-// //     ) {
-// //       return "status-cancelled";
-// //     }
-
-// //     if (
-// //       value.includes("progress")
-// //     ) {
-// //       return "status-progress";
-// //     }
-
-// //     return "status-scheduled";
-// //   };
-
-// //   return (
-// //     <div className="page-container maintenance-page">
-
-// //       {/* PAGE HEADER */}
-// //       <div className="page-header maintenance-header">
-
-// //         <div>
-// //           <p className="eyebrow">
-// //             MAINTENANCE MANAGEMENT
-// //           </p>
-
-// //           <h1>
-// //             Maintenance Scheduler
-// //           </h1>
-
-// //           <p className="page-subtitle">
-// //             Schedule, monitor and complete
-// //             industrial asset maintenance tasks.
-// //           </p>
-// //         </div>
-
-// //         <div className="maintenance-header-actions">
-
-// //           <button
-// //             type="button"
-// //             className="secondary-btn refresh-btn"
-// //             onClick={refreshSchedules}
-// //             disabled={loading}
-// //           >
-// //             {loading
-// //               ? "Refreshing..."
-// //               : "Refresh"}
-// //           </button>
-
-// //           {canSchedule && (
-// //             <button
-// //               type="button"
-// //               className="add-btn"
-// //               onClick={handleOpenSchedule}
-// //             >
-// //               + Schedule Maintenance
-// //             </button>
-// //           )}
-
-// //         </div>
-// //       </div>
-
-// //       {/* SUMMARY CARDS */}
-// //       <div className="maintenance-summary-grid">
-
-// //         <div className="maintenance-summary-card">
-// //           <div className="summary-icon">
-// //             ⚙
-// //           </div>
-
-// //           <div>
-// //             <span>Total Schedules</span>
-// //             <strong>
-// //               {schedules.length}
-// //             </strong>
-// //           </div>
-// //         </div>
-
-// //         <div className="maintenance-summary-card">
-// //           <div className="summary-icon">
-// //             📅
-// //           </div>
-
-// //           <div>
-// //             <span>Scheduled</span>
-// //             <strong>
-// //               {
-// //                 schedules.filter(
-// //                   (item) =>
-// //                     String(
-// //                       getStatus(item)
-// //                     ).toUpperCase() ===
-// //                     "SCHEDULED"
-// //                 ).length
-// //               }
-// //             </strong>
-// //           </div>
-// //         </div>
-
-// //         <div className="maintenance-summary-card">
-// //           <div className="summary-icon">
-// //             ✓
-// //           </div>
-
-// //           <div>
-// //             <span>Completed</span>
-// //             <strong>
-// //               {
-// //                 schedules.filter(
-// //                   (item) =>
-// //                     String(
-// //                       getStatus(item)
-// //                     )
-// //                       .toLowerCase()
-// //                       .includes(
-// //                         "complete"
-// //                       )
-// //                 ).length
-// //               }
-// //             </strong>
-// //           </div>
-// //         </div>
-
-// //         <div className="maintenance-summary-card">
-// //           <div className="summary-icon danger">
-// //             !
-// //           </div>
-
-// //           <div>
-// //             <span>High Priority</span>
-// //             <strong>
-// //               {
-// //                 schedules.filter(
-// //                   (item) => {
-// //                     const priority =
-// //                       String(
-// //                         getPriority(item)
-// //                       ).toUpperCase();
-
-// //                     return (
-// //                       priority ===
-// //                         "HIGH" ||
-// //                       priority ===
-// //                         "CRITICAL"
-// //                     );
-// //                   }
-// //                 ).length
-// //               }
-// //             </strong>
-// //           </div>
-// //         </div>
-
-// //       </div>
-
-// //       {/* SEARCH */}
-// //       <div className="maintenance-toolbar">
-
-// //         <input
-// //           type="text"
-// //           className="search-input"
-// //           placeholder="Search maintenance schedules..."
-// //           value={search}
-// //           onChange={(event) =>
-// //             setSearch(event.target.value)
-// //           }
-// //         />
-
-// //         <span className="schedule-count">
-// //           Showing{" "}
-// //           {filteredSchedules.length}{" "}
-// //           schedule
-// //           {filteredSchedules.length !==
-// //           1
-// //             ? "s"
-// //             : ""}
-// //         </span>
-
-// //       </div>
-
-// //       {/* ERROR */}
-// //       {error && (
-// //         <div className="error-message maintenance-error">
-// //           {typeof error === "string"
-// //             ? error
-// //             : error?.message ||
-// //               "Unable to load maintenance schedules."}
-// //         </div>
-// //       )}
-
-// //       {/* LOADING */}
-// //       {loading && (
-// //         <div
-// //           className="loading-spinner"
-// //           role="status"
-// //         >
-// //           Loading maintenance schedules...
-// //         </div>
-// //       )}
-
-// //       {/* TABLE */}
-// //       {!loading && (
-// //         <div className="maintenance-table-card">
-
-// //           {filteredSchedules.length >
-// //           0 ? (
-// //             <div className="table-wrapper">
-
-// //               <table className="maintenance-table">
-
-// //                 <thead>
-// //                   <tr>
-// //                     <th>Asset</th>
-// //                     <th>Asset Name</th>
-// //                     <th>Planned Date</th>
-// //                     <th>Maintenance Type</th>
-// //                     <th>Priority</th>
-// //                     <th>Status</th>
-// //                     <th>Action</th>
-// //                   </tr>
-// //                 </thead>
-
-// //                 <tbody>
-
-// //                   {filteredSchedules.map(
-// //                     (schedule, index) => {
-
-// //                       const key =
-// //                         schedule?.id ??
-// //                         schedule?.scheduleId ??
-// //                         `${getAssetId(
-// //                           schedule
-// //                         )}-${index}`;
-
-// //                       const status =
-// //                         getStatus(
-// //                           schedule
-// //                         );
-
-// //                       return (
-// //                         <tr
-// //                           key={key}
-// //                         >
-
-// //                           <td>
-// //                             <strong>
-// //                               {getAssetTag(
-// //                                 schedule
-// //                               )}
-// //                             </strong>
-// //                           </td>
-
-// //                           <td>
-// //                             {getAssetName(
-// //                               schedule
-// //                             )}
-// //                           </td>
-
-// //                           <td>
-// //                             <span className="date-cell">
-// //                               {getDate(
-// //                                 schedule
-// //                               )}
-// //                             </span>
-// //                           </td>
-
-// //                           <td>
-// //                             <span className="maintenance-type">
-// //                               {getMaintenanceType(
-// //                                 schedule
-// //                               )}
-// //                             </span>
-// //                           </td>
-
-// //                           <td>
-// //                             <span
-// //                               className={`priority-badge ${getPriorityClass(
-// //                                 getPriority(
-// //                                   schedule
-// //                                 )
-// //                               )}`}
-// //                             >
-// //                               {getPriority(
-// //                                 schedule
-// //                               )}
-// //                             </span>
-// //                           </td>
-
-// //                           <td>
-// //                             <span
-// //                               className={`status-badge ${getStatusClass(
-// //                                 status
-// //                               )}`}
-// //                             >
-// //                               {status}
-// //                             </span>
-// //                           </td>
-
-// //                           <td>
-
-// //                             <div className="maintenance-actions">
-
-// //                               <button
-// //                                 type="button"
-// //                                 className="view-btn"
-// //                                 onClick={() =>
-// //                                   handleOpenLog(
-// //                                     schedule
-// //                                   )
-// //                                 }
-// //                               >
-// //                                 View
-// //                               </button>
-
-// //                               {canComplete &&
-// //                                 !String(
-// //                                   status
-// //                                 )
-// //                                   .toLowerCase()
-// //                                   .includes(
-// //                                     "complete"
-// //                                   ) && (
-// //                                   <button
-// //                                     type="button"
-// //                                     className="complete-btn"
-// //                                     onClick={() =>
-// //                                       handleOpenLog(
-// //                                         schedule
-// //                                       )
-// //                                     }
-// //                                   >
-// //                                     Complete
-// //                                   </button>
-// //                                 )}
-
-// //                             </div>
-
-// //                           </td>
-
-// //                         </tr>
-// //                       );
-// //                     }
-// //                   )}
-
-// //                 </tbody>
-
-// //               </table>
-
-// //             </div>
-// //           ) : (
-// //             <div className="maintenance-empty">
-
-// //               <div className="empty-icon">
-// //                 ⚙
-// //               </div>
-
-// //               <h3>
-// //                 No Maintenance Schedules
-// //               </h3>
-
-// //               <p>
-// //                 No maintenance schedules
-// //                 match your search.
-// //               </p>
-
-// //               {canSchedule && (
-// //                 <button
-// //                   type="button"
-// //                   className="add-btn"
-// //                   onClick={
-// //                     handleOpenSchedule
-// //                   }
-// //                 >
-// //                   Schedule Maintenance
-// //                 </button>
-// //               )}
-
-// //             </div>
-// //           )}
-
-// //         </div>
-// //       )}
-
-// //       {/* SCHEDULE MODAL */}
-// //       {showScheduleModal && (
-// //         <ScheduleMaintenanceModal
-// //           isOpen={
-// //             showScheduleModal
-// //           }
-// //           onClose={
-// //             handleCloseSchedule
-// //           }
-// //           onSuccess={
-// //             handleScheduleSuccess
-// //           }
-// //         />
-// //       )}
-
-// //       {/* LOG / COMPLETE MODAL */}
-// //       {showLogModal &&
-// //         selectedSchedule && (
-// //           <LogMaintenanceModal
-// //             isOpen={showLogModal}
-// //             onClose={
-// //               handleCloseLog
-// //             }
-// //             schedule={
-// //               selectedSchedule
-// //             }
-// //             onSuccess={
-// //               handleMaintenanceSuccess
-// //             }
-// //           />
-// //         )}
-
-// //     </div>
-// //   );
-// // };
-
-// // export default MaintenanceScheduler;
-// import React, {
-//   useEffect,
-//   useState,
-// } from "react";
-
-// import {
-//   useDispatch,
-//   useSelector,
-// } from "react-redux";
-
-// import {
-//   fetchSchedules,
-//   createSchedule,
-// } from "../../store/slices/maintenanceSlice";
-
-// import ScheduleMaintenanceModal
-//   from "./ScheduleMaintenanceModal";
-
-// import {
-//   normalizeRole,
-//   canScheduleMaintenance,
-//   canCompleteMaintenance,
-// } from "../../utils/roleAccess";
-
-// import LogMaintenanceModal
-//   from "./LogMaintenanceModal";
-
-// const MaintenanceScheduler = () => {
-
-//   const dispatch = useDispatch();
-
-//   const maintenance =
-//     useSelector(
-//       (state) =>
-//         state.maintenance || {}
-//     );
-
-//   const auth =
-//     useSelector(
-//       (state) =>
-//         state.auth || {}
-//     );
-
-//   const role =
-//     normalizeRole(
-//       auth.role ||
-//       auth.user?.role ||
-//       ""
-//     );
-
-//   const schedules =
-//     Array.isArray(
-//       maintenance.schedules
-//     )
-//       ? maintenance.schedules
-//       : [];
-
-//   const loading =
-//     maintenance.loading === true;
-
-//   const error =
-//     maintenance.error;
-
-//   const [showScheduleModal, setShowScheduleModal] =
-//     useState(false);
-
-//   const [showLogModal, setShowLogModal] =
-//     useState(false);
-
-//   const [selectedSchedule, setSelectedSchedule] =
-//     useState(null);
-
-//   useEffect(() => {
-
-//     if (
-//       schedules.length === 0 &&
-//       !loading
-//     ) {
-//       dispatch(fetchSchedules());
-//     }
-
-//   }, [
-//     dispatch,
-//     schedules.length,
-//     loading,
-//   ]);
-
-//   const openLogModal = (schedule) => {
-
-//     setSelectedSchedule(schedule);
-
-//     setShowLogModal(true);
-//   };
-
-//   return (
-
-//     <div className="page-container maintenance-page">
-
-//       <div className="page-header">
-
-//         <div>
-
-//           <p className="eyebrow">
-//             MAINTENANCE MANAGEMENT
-//           </p>
-
-//           <h1>
-//             Maintenance Scheduler
-//           </h1>
-
-//           <p className="page-subtitle">
-//             Schedule and track industrial
-//             equipment maintenance.
-//           </p>
-
-//         </div>
-
-//         {canScheduleMaintenance(role) && (
-
-//           <button
-//             type="button"
-//             className="add-btn"
-//             onClick={() =>
-//               setShowScheduleModal(true)
-//             }
-//           >
-//             Schedule Maintenance
-//           </button>
-
-//         )}
-
-//       </div>
-
-//       {error && (
-
-//         <div className="error-message">
-//           {typeof error === "string"
-//             ? error
-//             : "Failed to load maintenance schedules"}
-//         </div>
-
-//       )}
-
-//       {loading && (
-
-//         <div
-//           className="loading-spinner"
-//           role="status"
-//         >
-//           Loading...
-//         </div>
-
-//       )}
-
-//       {!loading && (
-
-//         <div className="table-wrapper">
-
-//           <table className="asset-table">
-
-//             <thead>
-
-//               <tr>
-
-//                 <th>
-//                   Asset
-//                 </th>
-
-//                 <th>
-//                   Planned Date
-//                 </th>
-
-//                 <th>
-//                   Maintenance Type
-//                 </th>
-
-//                 <th>
-//                   Priority
-//                 </th>
-
-//                 <th>
-//                   Status
-//                 </th>
-
-//                 <th>
-//                   Action
-//                 </th>
-
-//               </tr>
-
-//             </thead>
-
-//             <tbody>
-
-//               {schedules.length > 0 ? (
-
-//                 schedules.map(
-//                   (schedule, index) => {
-
-//                     const id =
-//                       schedule?.id ??
-//                       schedule?.scheduleId ??
-//                       index;
-
-//                     return (
-
-//                       <tr key={id}>
-
-//                         <td>
-//                           {schedule?.asset?.assetTag ||
-//                             schedule?.assetTag ||
-//                             schedule?.assetId ||
-//                             "-"}
-//                         </td>
-
-//                         <td>
-//                           {schedule?.plannedDate ||
-//                             "-"}
-//                         </td>
-
-//                         <td>
-//                           {schedule?.maintenanceType ||
-//                             "-"}
-//                         </td>
-
-//                         <td>
-//                           {schedule?.priority ||
-//                             "-"}
-//                         </td>
-
-//                         <td>
-//                           {schedule?.status ||
-//                             "SCHEDULED"}
-//                         </td>
-
-//                         <td>
-
-//                           {canCompleteMaintenance(
-//                             role
-//                           ) && (
-
-//                             <button
-//                               type="button"
-//                               className="primary-btn small-btn"
-//                               onClick={() =>
-//                                 openLogModal(
-//                                   schedule
-//                                 )
-//                               }
-//                             >
-//                               Complete Task
-//                             </button>
-
-//                           )}
-
-//                         </td>
-
-//                       </tr>
-
-//                     );
-//                   }
-//                 )
-
-//               ) : (
-
-//                 <tr>
-
-//                   <td
-//                     colSpan="6"
-//                     className="empty-cell"
-//                   >
-//                     No maintenance schedules found.
-//                   </td>
-
-//                 </tr>
-
-//               )}
-
-//             </tbody>
-
-//           </table>
-
-//         </div>
-
-//       )}
-
-//       {showScheduleModal && (
-
-//         <ScheduleMaintenanceModal
-//           isOpen={
-//             showScheduleModal
-//           }
-//           onClose={() =>
-//             setShowScheduleModal(false)
-//           }
-//         />
-
-//       )}
-
-//       {showLogModal && (
-
-//         <LogMaintenanceModal
-//           isOpen={
-//             showLogModal
-//           }
-//           onClose={() =>
-//             setShowLogModal(false)
-//           }
-//           schedule={
-//             selectedSchedule
-//           }
-//         />
-
-//       )}
-
-//     </div>
-
-//   );
-// };
-
-// export default MaintenanceScheduler;
-import React, {
-  useCallback,
-  useEffect,
-  useState
-} from "react";
-
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import LogMaintenanceModal from "./LogMaintenanceModal";
+import ScheduleMaintenanceModal from "./ScheduleMaintenanceModal";
 
-import {
-  useSelector
-} from "react-redux";
-
-import ScheduleMaintenanceModal
-  from "./ScheduleMaintenanceModal";
-
-import LogMaintenanceModal
-  from "./LogMaintenanceModal";
-
-
-const API =
-  "http://localhost:8080/api";
-
+const API = "http://localhost:8080/api";
 
 const MaintenanceScheduler = () => {
 
-  const auth =
-    useSelector(
-      (state) => state.auth || {}
-    );
+  const [schedules, setSchedules] = useState([]);
 
-  const [schedules, setSchedules] =
-    useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [error, setError] = useState("");
 
-  const [showSchedule, setShowSchedule] =
-    useState(false);
+  const [
+    selectedSchedule,
+    setSelectedSchedule
+  ] = useState(null);
 
-  const [selectedSchedule, setSelectedSchedule] =
-    useState(null);
+  const [
+    showCompleteModal,
+    setShowCompleteModal
+  ] = useState(false);
 
+  const [
+    showScheduleModal,
+    setShowScheduleModal
+  ] = useState(false);
+
+  // =========================================================
+  // AUTH
+  // =========================================================
+
+  const token =
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+
+  const username =
+    localStorage.getItem("username");
 
   const role =
-    String(
-      auth.role ||
-      auth.user?.role ||
-      localStorage.getItem("role") ||
-      ""
-    ).toUpperCase();
+    localStorage.getItem("role");
 
+  const normalizedRole =
+    String(role || "")
+      .toUpperCase();
 
-  const canSchedule =
-    [
-      "SYSTEM_ADMIN",
-      "ADMIN",
-      "ASSET_MANAGER",
-      "MANAGER"
-    ].includes(role);
+  // =========================================================
+  // PERMISSIONS
+  // =========================================================
 
+  const canCreateSchedule = [
+    "SYSTEM_ADMIN",
+    "ASSET_MANAGER",
+    "MAINTENANCE_TECHNICIAN",
+    "OPERATIONS_SUPERVISOR"
+  ].includes(normalizedRole);
 
-  const canComplete =
-    [
-      "SYSTEM_ADMIN",
-      "ADMIN",
-      "MAINTENANCE_TECHNICIAN",
-      "TECH"
-    ].includes(role);
+  const canComplete = [
+    "SYSTEM_ADMIN",
+    "ASSET_MANAGER",
+    "MAINTENANCE_TECHNICIAN"
+  ].includes(normalizedRole);
 
+  // =========================================================
+  // FETCH
+  // =========================================================
 
-  const getConfig = () => {
+  const fetchSchedules = async () => {
 
-    const token =
-      localStorage.getItem("token") ||
-      localStorage.getItem(
-        "authToken"
-      );
+    try {
 
-    return token
-      ? {
-          headers: {
-            Authorization:
-              `Bearer ${token}`
+      setLoading(true);
+      setError("");
+
+      let response;
+
+      if (token) {
+
+        response = await axios.get(
+          `${API}/maintenance/schedules`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
           }
-        }
-      : {};
+        );
 
-  };
+      } else {
 
+        response = await axios.get(
+          `${API}/maintenance/schedules`
+        );
+      }
 
-  const loadSchedules =
-    useCallback(async () => {
+      const data =
+        response?.data;
 
-      try {
-
-        const response =
-          await axios.get(
-            `${API}/maintenance/schedules`,
-            getConfig()
-          );
-
-        const data =
-          Array.isArray(
-            response.data
-          )
-            ? response.data
-            : [];
+      if (Array.isArray(data)) {
 
         setSchedules(data);
 
-      } catch (error) {
+      } else {
 
-        console.error(
-          "Maintenance loading failed:",
-          error
-        );
-
-      } finally {
-
-        setLoading(false);
-
+        setSchedules([]);
       }
 
-    }, []);
+    } catch (err) {
 
+      console.error(
+        "Failed to fetch schedules:",
+        err
+      );
+
+      setError(
+        err?.response?.data?.message ||
+        "Unable to load maintenance schedules."
+      );
+
+      setSchedules([]);
+
+    } finally {
+
+      setLoading(false);
+    }
+  };
+
+  // =========================================================
+  // INITIAL LOAD
+  // =========================================================
 
   useEffect(() => {
 
-    loadSchedules();
+    fetchSchedules();
 
-    const timer =
-      setInterval(
-        loadSchedules,
-        10000
-      );
+  }, []);
 
-    return () =>
-      clearInterval(timer);
+  // =========================================================
+  // STATUS
+  // =========================================================
 
-  }, [loadSchedules]);
+  const getScheduleStatus = (schedule) => {
 
+    const backendStatus =
+      String(
+        schedule?.status || ""
+      ).toUpperCase();
 
-  const getStatus =
-    (schedule) => {
+    // -------------------------------------------------------
+    // ALWAYS TRUST COMPLETED
+    // -------------------------------------------------------
 
-      const backendStatus =
-        String(
-          schedule.status ??
-          ""
-        ).toUpperCase();
+    if (
+      backendStatus ===
+      "COMPLETED"
+    ) {
 
-      if (
-        backendStatus ===
-        "COMPLETED"
-      ) {
-        return "COMPLETED";
+      return "COMPLETED";
+    }
+
+    if (
+      backendStatus ===
+      "CANCELLED"
+    ) {
+
+      return "CANCELLED";
+    }
+
+    if (
+      backendStatus ===
+      "UNDER_MAINTENANCE"
+    ) {
+
+      return "UNDER_MAINTENANCE";
+    }
+
+    // -------------------------------------------------------
+    // ONLY PENDING CAN BECOME OVERDUE
+    // -------------------------------------------------------
+
+    if (
+      backendStatus ===
+      "PENDING"
+    ) {
+
+      const plannedDate =
+        schedule?.plannedDate;
+
+      if (!plannedDate) {
+
+        return "PENDING";
       }
 
-      const date =
+      const today =
+        new Date();
+
+      today.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const planned =
         new Date(
-          schedule.plannedDate ??
-          schedule.planned_date
+          `${plannedDate}T00:00:00`
         );
+
+      planned.setHours(
+        0,
+        0,
+        0,
+        0
+      );
 
       if (
-        !Number.isNaN(
-          date.getTime()
-        )
+        planned < today
       ) {
 
-        const today =
-          new Date();
-
-        today.setHours(
-          0, 0, 0, 0
-        );
-
-        date.setHours(
-          0, 0, 0, 0
-        );
-
-        if (date < today) {
-          return "OVERDUE";
-        }
-
-        if (
-          date.getTime() ===
-          today.getTime()
-        ) {
-          return "DUE TODAY";
-        }
-
-        return "UPCOMING";
+        return "OVERDUE";
       }
 
-      return (
-        backendStatus ||
-        "SCHEDULED"
-      );
+      return "PENDING";
+    }
+
+    return backendStatus ||
+      "PENDING";
+  };
+
+  // =========================================================
+  // STATUS CLASS
+  // =========================================================
+
+  const getStatusClass = (status) => {
+
+    switch (status) {
+
+      case "COMPLETED":
+        return "status-completed";
+
+      case "OVERDUE":
+        return "status-overdue";
+
+      case "CANCELLED":
+        return "status-cancelled";
+
+      case "UNDER_MAINTENANCE":
+        return "status-maintenance";
+
+      default:
+        return "status-pending";
+    }
+  };
+
+  // =========================================================
+  // OPEN COMPLETE MODAL
+  // =========================================================
+
+  const handleComplete = (schedule) => {
+
+    setSelectedSchedule(schedule);
+
+    setShowCompleteModal(true);
+  };
+
+  // =========================================================
+  // CLOSE COMPLETE MODAL
+  // =========================================================
+
+  const closeCompleteModal = () => {
+
+    setShowCompleteModal(false);
+
+    setSelectedSchedule(null);
+  };
+
+  // =========================================================
+  // COMPLETED
+  // =========================================================
+
+  const handleMaintenanceCompleted =
+    async () => {
+
+      await fetchSchedules();
     };
 
+  // =========================================================
+  // CREATED
+  // =========================================================
 
-  const getAsset =
-    (schedule) => {
+  const handleScheduleCreated =
+    async () => {
 
-      return (
-        schedule.asset?.assetTag ||
-        schedule.asset?.asset_tag ||
-        schedule.assetTag ||
-        schedule.assetId ||
-        "-"
-      );
+      setShowScheduleModal(false);
+
+      await fetchSchedules();
     };
 
+  // =========================================================
+  // DISPLAY
+  // =========================================================
+
+  const displaySchedules =
+    useMemo(() => {
+
+      return [...schedules];
+
+    }, [schedules]);
+
+  // =========================================================
+  // RENDER
+  // =========================================================
 
   return (
 
-    <div className="page-container maintenance-page">
+    <div className="page-container">
 
-      <div className="maintenance-hero">
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
+      <div className="page-header">
 
         <div>
 
-          <span className="eyebrow">
-            MAINTENANCE CONTROL CENTER
+          <span className="page-eyebrow">
+            MAINTENANCE CONTROL
           </span>
 
           <h1>
@@ -1210,252 +336,302 @@ const MaintenanceScheduler = () => {
           </h1>
 
           <p>
-            Real-time industrial maintenance
-            planning, tracking and completion.
+            Monitor and manage industrial
+            equipment maintenance tasks.
           </p>
 
         </div>
 
-
-        {canSchedule && (
+        <div className="header-actions">
 
           <button
             type="button"
-            className="add-btn"
-            onClick={() =>
-              setShowSchedule(true)
-            }
+            className="refresh-btn"
+            onClick={fetchSchedules}
+            disabled={loading}
           >
-            + Schedule Maintenance
+            {loading
+              ? "Refreshing..."
+              : "Refresh"}
           </button>
 
-        )}
+          {/* =================================================
+              ADD SCHEDULE
+          ================================================= */}
+
+          {canCreateSchedule && (
+
+            <button
+              type="button"
+              className="add-btn"
+              onClick={() =>
+                setShowScheduleModal(true)
+              }
+            >
+              + Add Maintenance Schedule
+            </button>
+
+          )}
+
+        </div>
 
       </div>
 
+      {/* =====================================================
+          ERROR
+      ===================================================== */}
 
-      <div className="maintenance-live-bar">
+      {error && (
 
-        <span className="live-indicator">
-          ● LIVE
-        </span>
+        <div
+          className="form-error"
+          role="alert"
+        >
+          {error}
+        </div>
 
-        <span>
-          Monitoring maintenance schedules
-          automatically
-        </span>
+      )}
 
-        <span>
-          Auto refresh: 10 seconds
-        </span>
+      {/* =====================================================
+          LOADING
+      ===================================================== */}
 
-      </div>
+      {loading ? (
 
+        <div className="loading-state">
+          Loading maintenance schedules...
+        </div>
 
-      <div className="maintenance-table-card">
+      ) : (
 
-        <table className="maintenance-table">
+        <div className="table-container">
 
-          <thead>
+          <table className="maintenance-table">
 
-            <tr>
-              <th>Asset</th>
-              <th>Planned Date</th>
-              <th>Maintenance Type</th>
-              <th>Priority</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            {loading ? (
+            <thead>
 
               <tr>
-                <td colSpan="6">
-                  Loading maintenance data...
-                </td>
+
+                <th>Asset</th>
+
+                <th>Planned Date</th>
+
+                <th>Maintenance Type</th>
+
+                <th>Priority</th>
+
+                <th>Status</th>
+
+                <th>Action</th>
+
               </tr>
 
-            ) : schedules.length === 0 ? (
+            </thead>
 
-              <tr>
-                <td colSpan="6">
-                  No maintenance schedules found.
-                </td>
-              </tr>
+            <tbody>
 
-            ) : (
+              {displaySchedules.length === 0 ? (
 
-              schedules.map(
-                (schedule, index) => {
+                <tr>
 
-                  const status =
-                    getStatus(schedule);
+                  <td
+                    colSpan="6"
+                    className="empty-table"
+                  >
+                    No maintenance schedules found.
+                  </td>
 
-                  return (
+                </tr>
 
-                    <tr
-                      key={
-                        schedule.id ??
-                        schedule.scheduleId ??
-                        index
-                      }
-                    >
+              ) : (
 
-                      <td>
-                        <strong>
-                          {getAsset(schedule)}
-                        </strong>
-                      </td>
+                displaySchedules.map(
+                  (schedule, index) => {
 
-                      <td>
-                        {schedule.plannedDate ??
-                          schedule.planned_date ??
-                          "Not scheduled"}
-                      </td>
+                    const status =
+                      getScheduleStatus(
+                        schedule
+                      );
 
-                      <td>
-                        {schedule.maintenanceType ??
-                          schedule.maintenance_type ??
-                          "-"}
-                      </td>
+                    const asset =
+                      schedule?.asset || {};
 
-                      <td>
+                    const assetTag =
+                      asset?.assetTag ||
+                      schedule?.assetTag ||
+                      asset?.asset_tag ||
+                      schedule?.asset_tag ||
+                      "Unknown Asset";
 
-                        <span
-                          className={
-                            `priority-${String(
-                              schedule.priority ??
-                              "MEDIUM"
-                            ).toLowerCase()}`
-                          }
-                        >
-                          {schedule.priority ??
-                            "MEDIUM"}
-                        </span>
+                    return (
 
-                      </td>
+                      <tr
+                        key={
+                          schedule?.id ||
+                          index
+                        }
+                      >
 
+                        {/* ASSET */}
 
-                      <td>
+                        <td>
 
-                        <span
-                          className={
-                            `maintenance-status status-${status
-                              .toLowerCase()
-                              .replace(
-                                /\s/g,
-                                "-"
-                              )}`
-                          }
-                        >
-                          {status}
-                        </span>
+                          <strong>
+                            {assetTag}
+                          </strong>
 
-                      </td>
+                        </td>
 
+                        {/* DATE */}
 
-                      <td>
+                        <td>
+                          {schedule?.plannedDate ||
+                            "-"}
+                        </td>
 
-                        <div className="action-buttons">
+                        {/* TYPE */}
 
-                          <button
-                            type="button"
-                            className="secondary-btn small"
-                            onClick={() =>
-                              alert(
-                                `Asset: ${getAsset(schedule)}\n` +
-                                `Type: ${schedule.maintenanceType ?? "-"}\n` +
-                                `Priority: ${schedule.priority ?? "-"}\n` +
-                                `Status: ${status}`
-                              )
-                            }
+                        <td>
+                          {schedule?.maintenanceType ||
+                            "-"}
+                        </td>
+
+                        {/* PRIORITY */}
+
+                        <td>
+
+                          <span className="priority-badge">
+
+                            {schedule?.priority ||
+                              "-"}
+
+                          </span>
+
+                        </td>
+
+                        {/* STATUS */}
+
+                        <td>
+
+                          <span
+                            className={`status-badge ${getStatusClass(
+                              status
+                            )}`}
                           >
-                            View
-                          </button>
 
+                            {status}
 
-                          {canComplete &&
-                            status !==
-                              "COMPLETED" && (
+                          </span>
+
+                        </td>
+
+                        {/* ACTION */}
+
+                        <td>
+
+                          <div className="action-buttons">
 
                             <button
                               type="button"
-                              className="complete-btn"
+                              className="view-btn"
                               onClick={() =>
-                                setSelectedSchedule(
+                                console.log(
+                                  "Schedule:",
                                   schedule
                                 )
                               }
                             >
-                              ✓ Complete
+                              View
                             </button>
 
-                          )}
+                            {/* COMPLETE BUTTON */}
 
-                          {status ===
-                            "OVERDUE" && (
+                            {canComplete &&
+                              status !==
+                                "COMPLETED" &&
+                              status !==
+                                "CANCELLED" && (
 
-                            <span className="overdue-label">
-                              Action Required
-                            </span>
+                                <button
+                                  type="button"
+                                  className="complete-btn"
+                                  onClick={() =>
+                                    handleComplete(
+                                      schedule
+                                    )
+                                  }
+                                >
+                                  ✓ Complete
+                                </button>
 
-                          )}
+                              )}
 
-                        </div>
+                          </div>
 
-                      </td>
+                        </td>
 
-                    </tr>
+                      </tr>
 
-                  );
-                }
-              )
+                    );
+                  }
+                )
 
-            )}
+              )}
 
-          </tbody>
+            </tbody>
 
-        </table>
+          </table>
 
-      </div>
-
-
-      {showSchedule && (
-
-        <ScheduleMaintenanceModal
-          isOpen={true}
-          onClose={() => {
-            setShowSchedule(false);
-            loadSchedules();
-          }}
-        />
-
-      )}
-
-
-      {selectedSchedule && (
-
-        <LogMaintenanceModal
-          isOpen={true}
-          schedule={
-            selectedSchedule
-          }
-          onClose={() => {
-            setSelectedSchedule(null);
-            loadSchedules();
-          }}
-        />
+        </div>
 
       )}
+
+      {/* =====================================================
+          COMPLETE MODAL
+      ===================================================== */}
+
+      <LogMaintenanceModal
+
+        isOpen={
+          showCompleteModal
+        }
+
+        schedule={
+          selectedSchedule
+        }
+
+        onClose={
+          closeCompleteModal
+        }
+
+        onCompleted={
+          handleMaintenanceCompleted
+        }
+
+      />
+
+      {/* =====================================================
+          ADD SCHEDULE MODAL
+      ===================================================== */}
+
+      <ScheduleMaintenanceModal
+
+        isOpen={
+          showScheduleModal
+        }
+
+        onClose={() =>
+          setShowScheduleModal(false)
+        }
+
+        onSuccess={
+          handleScheduleCreated
+        }
+
+      />
 
     </div>
   );
 };
-
 
 export default MaintenanceScheduler;
