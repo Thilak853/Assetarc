@@ -43,6 +43,7 @@ public class AssetService {
             if (dto.getInstallDate() != null) asset.setInstallDate(dto.getInstallDate());
             if (dto.getPurchasePrice() != null) asset.setPurchasePrice(dto.getPurchasePrice());
             if (dto.getExpectedLifespanYears() != null) asset.setExpectedLifespanYears(dto.getExpectedLifespanYears());
+            if (dto.getCurrentHealth() != null) asset.setCurrentHealth(dto.getCurrentHealth());
         }
         asset.setCurrentStatus(AssetStatus.ACTIVE);
 
@@ -59,8 +60,16 @@ public class AssetService {
             if (dto.getInstallDate() != null) asset.setInstallDate(dto.getInstallDate());
             if (dto.getPurchasePrice() != null) asset.setPurchasePrice(dto.getPurchasePrice());
             if (dto.getExpectedLifespanYears() != null) asset.setExpectedLifespanYears(dto.getExpectedLifespanYears());
+            if (dto.getCurrentHealth() != null) asset.setCurrentHealth(dto.getCurrentHealth());
         }
 
+        return assetRepository.save(asset);
+    }
+
+    @Transactional
+    public IndustrialAsset updateHealth(Long id, Integer health) {
+        IndustrialAsset asset = getAssetById(id);
+        asset.setCurrentHealth(health);
         return assetRepository.save(asset);
     }
 

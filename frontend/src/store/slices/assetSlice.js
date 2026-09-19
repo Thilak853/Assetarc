@@ -244,13 +244,7 @@ const initialState = {
   loading: false,
 
   error: null,
-
 };
-
-
-/* =========================================================
-   SLICE
-========================================================= */
 
 const assetSlice =
   createSlice({
@@ -261,14 +255,6 @@ const assetSlice =
 
     reducers: {
 
-      clearAssetError: (
-        state
-      ) => {
-
-        state.error = null;
-
-      },
-
 
       clearAssets: (
         state
@@ -278,6 +264,31 @@ const assetSlice =
 
         state.items = [];
 
+      },
+
+      updateAssetLocally: (
+        state,
+        action
+      ) => {
+        const updatedAsset = action.payload;
+        const updatedId =
+          updatedAsset?.id ??
+          updatedAsset?.assetId ??
+          updatedAsset?.asset_id;
+
+        const replaceAsset = (asset) => {
+          const assetId =
+            asset?.id ??
+            asset?.assetId ??
+            asset?.asset_id;
+
+          return String(assetId) === String(updatedId)
+            ? { ...asset, ...updatedAsset }
+            : asset;
+        };
+
+        state.assets = state.assets.map(replaceAsset);
+        state.items = state.items.map(replaceAsset);
       },
 
     },
@@ -456,7 +467,7 @@ const assetSlice =
 
 
               state.assets =
-                state.assets.map(
+                state.assets.filter(
                   (asset) =>
                     asset.id === id
                       ? {
@@ -468,7 +479,7 @@ const assetSlice =
 
 
               state.items =
-                state.items.map(
+                state.items.filter(
                   (asset) =>
                     asset.id === id
                       ? {
@@ -551,28 +562,22 @@ const assetSlice =
 
 
               state.assets =
-                state.assets.map(
-                  (asset) =>
-                    asset.id === id
-                      ? {
-                          ...asset,
-                          currentStatus:
-                            "DECOMMISSIONED",
-                        }
-                      : asset
+                  state.assets.filter(
+                    (asset) => String(
+                      asset.id ??
+                      asset.assetId ??
+                      asset.asset_id
+                    ) !== String(id)
                 );
 
 
               state.items =
-                state.items.map(
-                  (asset) =>
-                    asset.id === id
-                      ? {
-                          ...asset,
-                          currentStatus:
-                            "DECOMMISSIONED",
-                        }
-                      : asset
+                  state.items.filter(
+                    (asset) => String(
+                      asset.id ??
+                      asset.assetId ??
+                      asset.asset_id
+                    ) !== String(id)
                 );
 
             }
@@ -586,6 +591,7 @@ const assetSlice =
 export const {
   clearAssetError,
   clearAssets,
+  updateAssetLocally,
 } = assetSlice.actions;
 
 

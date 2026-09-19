@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAssets,
   decommissionAsset,
+  updateAssetLocally,
 } from "../../store/slices/assetSlice";
 
 import AssetModal from "./AssetModal";
@@ -229,7 +230,19 @@ const AssetList = () => {
      AFTER SAVE
   ----------------------------- */
 
-  const handleAssetSaved = () => {
+  const handleAssetSaved = (
+    _response,
+    savedData
+  ) => {
+    if (savedData) {
+      dispatch(
+        updateAssetLocally({
+          ...(selectedAsset || {}),
+          ...savedData,
+        })
+      );
+    }
+
     handleCloseModal();
 
     initialFetchStarted.current = false;
@@ -246,7 +259,7 @@ const AssetList = () => {
      DECOMMISSION
   ----------------------------- */
 
-  const handleDecommission = async (
+  const handleDelete = async (
     asset
   ) => {
     if (!isManager) {
@@ -264,7 +277,7 @@ const AssetList = () => {
 
     const confirmed =
       window.confirm(
-        "Are you sure you want to decommission this asset?"
+        "Are you sure you want to delete this asset?"
       );
 
     if (!confirmed) {
@@ -275,19 +288,15 @@ const AssetList = () => {
       await dispatch(
         decommissionAsset(assetId)
       ).unwrap();
-
-      initialFetchStarted.current = false;
-
-      dispatch(
-        fetchAssets({
-          page,
-          size: 10,
-        })
-      );
     } catch (err) {
       console.error(
         "Failed to decommission asset:",
         err
+      );
+
+      window.alert(
+        err?.message ||
+        "Unable to decommission asset."
       );
     }
   };
@@ -733,18 +742,18 @@ const AssetList = () => {
                               </button>
                             )}
 
-                            {/* DECOMMISSION */}
+                            {/* DELETE */}
                             {isManager && (
                               <button
                                 type="button"
                                 className="danger-btn"
                                 onClick={() =>
-                                  handleDecommission(
+                                  handleDelete(
                                     asset
                                   )
                                 }
                               >
-                                Decommission
+                                Delete
                               </button>
                             )}
 

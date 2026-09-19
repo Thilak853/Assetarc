@@ -11,6 +11,7 @@ public class AssetRequestDto {
     private LocalDate installDate;
     private BigDecimal purchasePrice;
     private Integer expectedLifespanYears;
+    private Integer currentHealth;
     public AssetRequestDto() {
     }
     public AssetRequestDto(String assetTag, String name, String category, LocalDate installDate,
@@ -57,6 +58,14 @@ public class AssetRequestDto {
     }
     public void setExpectedLifespanYears(Integer expectedLifespanYears) {
         this.expectedLifespanYears = expectedLifespanYears;
+    }
+
+    public Integer getCurrentHealth() {
+        return currentHealth;
+    }
+
+    public void setCurrentHealth(Integer currentHealth) {
+        this.currentHealth = currentHealth;
     }
 
     

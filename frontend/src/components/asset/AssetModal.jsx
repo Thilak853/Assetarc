@@ -23,6 +23,7 @@ const emptyForm = {
   installDate: "",
   purchasePrice: "",
   expectedLifespanYears: "",
+  currentHealth: "",
 };
 
 const AssetModal = ({
@@ -113,6 +114,12 @@ const AssetModal = ({
         expectedLifespanYears:
           asset.expectedLifespanYears ??
           asset.expected_lifespan_years ??
+          "",
+
+        currentHealth:
+          asset.currentHealth ??
+          asset.healthScore ??
+          asset.health_score ??
           "",
 
       });
@@ -231,6 +238,13 @@ const AssetModal = ({
             ? null
             : Number(
                 form.expectedLifespanYears
+              ),
+
+        currentHealth:
+          form.currentHealth === ""
+            ? null
+            : Number(
+                form.currentHealth
               ),
 
       };
@@ -352,7 +366,8 @@ const AssetModal = ({
 
           onSaved(
             response?.data ??
-            response
+            response,
+            payload
           );
 
         }
@@ -711,6 +726,37 @@ const AssetModal = ({
                 placeholder="Expected lifespan"
                 value={
                   form.expectedLifespanYears
+                }
+                onChange={
+                  handleChange
+                }
+                disabled={
+                  saving
+                }
+              />
+
+            </div>
+
+
+            {/* HEALTH SCORE */}
+
+            <div className="form-group">
+
+              <label htmlFor="currentHealth">
+                Health Score (%)
+              </label>
+
+
+              <input
+                id="currentHealth"
+                name="currentHealth"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="Enter health score"
+                value={
+                  form.currentHealth
                 }
                 onChange={
                   handleChange

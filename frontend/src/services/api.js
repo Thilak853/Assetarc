@@ -15,6 +15,39 @@ const getToken = () =>
   ) ||
   "";
 
+const clearAuthSession = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("username");
+  localStorage.removeItem("role");
+};
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+
+    if (status === 401) {
+      clearAuthSession();
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
+      }
+    }
+
+    if (status === 403) {
+      if (window.location.pathname !== "/") {
+        window.location.href = "/dashboard";
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 const makeConfig = (
   config = {}
 ) => {
@@ -45,13 +78,11 @@ const api = {
       !config &&
       !getToken()
     ) {
-      return axios.get(
-        `${API_BASE_URL}${url}`
-      );
+      return apiClient.get(url);
     }
 
-    return axios.get(
-      `${API_BASE_URL}${url}`,
+    return apiClient.get(
+      url,
       makeConfig(config)
     );
   },
@@ -65,14 +96,14 @@ const api = {
       !config &&
       !getToken()
     ) {
-      return axios.post(
-        `${API_BASE_URL}${url}`,
+      return apiClient.post(
+        url,
         data
       );
     }
 
-    return axios.post(
-      `${API_BASE_URL}${url}`,
+    return apiClient.post(
+      url,
       data,
       makeConfig(config)
     );
@@ -87,14 +118,14 @@ const api = {
       !config &&
       !getToken()
     ) {
-      return axios.put(
-        `${API_BASE_URL}${url}`,
+      return apiClient.put(
+        url,
         data
       );
     }
 
-    return axios.put(
-      `${API_BASE_URL}${url}`,
+    return apiClient.put(
+      url,
       data,
       makeConfig(config)
     );
@@ -108,13 +139,11 @@ const api = {
       !config &&
       !getToken()
     ) {
-      return axios.delete(
-        `${API_BASE_URL}${url}`
-      );
+      return apiClient.delete(url);
     }
 
-    return axios.delete(
-      `${API_BASE_URL}${url}`,
+    return apiClient.delete(
+      url,
       makeConfig(config)
     );
   },

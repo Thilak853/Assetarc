@@ -7,6 +7,8 @@ import com.example.demo.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpMethod;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -99,6 +101,22 @@ public class SecurityConfig {
                     cors.configurationSource(
                             corsConfigurationSource()
                     )
+            )
+
+
+            .exceptionHandling(ex -> ex
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"message\":\"Your session has expired. Please log in again.\",\"status\":401}");
+                    })
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"message\":\"You do not have permission to perform this action.\",\"status\":403}");
+                    })
             )
 
 
@@ -208,6 +226,17 @@ public class SecurityConfig {
                     .hasAnyRole(
                             "SYSTEM_ADMIN",
                             "ASSET_MANAGER"
+                    )
+
+
+                    .requestMatchers(
+                            HttpMethod.PATCH,
+                            "/api/assets/*/health"
+                    )
+                    .hasAnyRole(
+                            "SYSTEM_ADMIN",
+                            "ASSET_MANAGER",
+                            "MAINTENANCE_TECHNICIAN"
                     )
 
 
@@ -489,6 +518,8 @@ public class SecurityConfig {
                         "http://localhost:5173"
                 )
         );
+
+        configuration.setAllowCredentials(true);
 
 
         configuration.setAllowedMethods(

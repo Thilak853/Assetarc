@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,6 +47,18 @@ public class IndustrialAsset {
     private AssetStatus currentStatus;
     @Column(name="current_health")
     private Integer currentHealth;
+    @Column(name="updated_at")
+    private LocalDateTime updatedAt;
+
+    @jakarta.persistence.PrePersist
+    protected void onCreate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    @jakarta.persistence.PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
     public IndustrialAsset() {
     }
     public IndustrialAsset(Long id, String assetTag, String name, String category, LocalDate installDate,
@@ -113,6 +126,14 @@ public class IndustrialAsset {
     }
     public void setCurrentHealth(Integer currentHealth) {
         this.currentHealth = currentHealth;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
    

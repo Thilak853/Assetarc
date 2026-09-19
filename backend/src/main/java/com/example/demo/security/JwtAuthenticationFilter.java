@@ -159,11 +159,11 @@ public class JwtAuthenticationFilter
             }
 
         } catch (Exception e) {
-
-            System.err.println(
-                    "JWT authentication failed: "
-                            + e.getMessage()
-            );
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"message\":\"Your session has expired. Please log in again.\",\"status\":401}");
+            return;
         }
 
 

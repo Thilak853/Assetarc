@@ -2,6 +2,8 @@ package com.example.demo.config;
 
 import com.example.demo.entity.SystemUser;
 import com.example.demo.entity.SystemUser.Role;
+import com.example.demo.entity.IndustrialAsset;
+import com.example.demo.repository.IndustrialAssetRepository;
 import com.example.demo.repository.SystemUserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,16 +13,29 @@ import org.springframework.stereotype.Component;
 public class DataSeeder implements CommandLineRunner {
 
     private final SystemUserRepository systemUserRepository;
+    private final IndustrialAssetRepository industrialAssetRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataSeeder(SystemUserRepository systemUserRepository, PasswordEncoder passwordEncoder) {
+    public DataSeeder(SystemUserRepository systemUserRepository,
+                      IndustrialAssetRepository industrialAssetRepository,
+                      PasswordEncoder passwordEncoder) {
         this.systemUserRepository = systemUserRepository;
+        this.industrialAssetRepository = industrialAssetRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
         seedUsers();
+        seedMissingHealthScores();
+    }
+
+    private void seedMissingHealthScores() {
+        industrialAssetRepository.findAll()
+                .stream()
+                .filter(asset -> asset.getCurrentHealth() == null)
+                .peek(asset -> asset.setCurrentHealth(75))
+                .forEach(industrialAssetRepository::save);
     }
 
     private void seedUsers() {

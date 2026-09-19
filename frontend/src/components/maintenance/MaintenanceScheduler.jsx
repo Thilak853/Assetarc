@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import LogMaintenanceModal from "./LogMaintenanceModal";
+import MaintenanceDetailsModal from "./MaintenanceDetailsModal";
 import ScheduleMaintenanceModal from "./ScheduleMaintenanceModal";
 
 const API = "http://localhost:8080/api";
@@ -265,6 +266,11 @@ const MaintenanceScheduler = () => {
     setSelectedSchedule(schedule);
 
     setShowCompleteModal(true);
+  };
+
+  const handleView = (schedule) => {
+
+    setSelectedSchedule(schedule);
   };
 
   // =========================================================
@@ -535,10 +541,7 @@ const MaintenanceScheduler = () => {
                               type="button"
                               className="view-btn"
                               onClick={() =>
-                                console.log(
-                                  "Schedule:",
-                                  schedule
-                                )
+                                handleView(schedule)
                               }
                             >
                               View
@@ -606,6 +609,33 @@ const MaintenanceScheduler = () => {
 
         onCompleted={
           handleMaintenanceCompleted
+        }
+
+      />
+
+      <MaintenanceDetailsModal
+
+        isOpen={
+          Boolean(
+            selectedSchedule &&
+            !showCompleteModal
+          )
+        }
+
+        schedule={
+          selectedSchedule
+        }
+
+        status={
+          selectedSchedule
+            ? getScheduleStatus(
+                selectedSchedule
+              )
+            : "PENDING"
+        }
+
+        onClose={() =>
+          setSelectedSchedule(null)
         }
 
       />

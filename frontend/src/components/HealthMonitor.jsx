@@ -1291,25 +1291,13 @@ const HealthMonitor = () => {
           editingAsset.assetId;
 
         const payload = {
-          ...editingAsset,
-
-          currentHealth:
-            health,
-
-          healthScore:
-            health,
-
-          condition:
-            form.condition,
-
-          healthLevel:
-            form.healthLevel,
+          currentHealth: health,
         };
 
 
         const response =
-          await axios.put(
-            `${API_BASE_URL}/assets/${id}`,
+          await axios.patch(
+            `${API_BASE_URL}/assets/${id}/health`,
             payload,
             getAuthConfig()
           );
@@ -1536,7 +1524,7 @@ const HealthMonitor = () => {
 
   return (
 
-    <div style={styles.page}>
+    <div className="health-monitor-page" style={styles.page}>
 
       <div style={styles.container}>
 

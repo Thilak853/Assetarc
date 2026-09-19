@@ -51,17 +51,47 @@ const getAuthData = () => {
  * ============================================================
  */
 
+const decodeJwtPayload = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) {
+      return null;
+    }
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return JSON.parse(atob(padded));
+  } catch (error) {
+    return null;
+  }
+};
+
+const isJwtExpired = (token) => {
+  const payload = decodeJwtPayload(token);
+
+  if (!payload || !payload.exp) {
+    return false;
+  }
+
+  return Date.now() >= payload.exp * 1000;
+};
+
 const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   const auth = getAuthData();
+  const token = auth.token;
 
-  /*
-   * Authentication is valid when either:
-   * - token exists
-   * - Redux/localStorage has authentication information
-   */
-  if (!auth.token) {
+  if (!token || isJwtExpired(token)) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+
     return (
       <Navigate
         to="/"

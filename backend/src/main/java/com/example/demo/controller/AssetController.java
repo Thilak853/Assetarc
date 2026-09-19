@@ -101,17 +101,16 @@ public class AssetController {
         "'ASSET_MANAGER'" +
         ")"
     )
-    public ResponseEntity<String>
+        public ResponseEntity<IndustrialAsset>
     createAsset(
             @RequestBody AssetRequestDto dto) {
 
-        assetService.createAsset(dto);
+        IndustrialAsset asset =
+            assetService.createAsset(dto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(
-                        "Asset created successfully."
-                );
+            .body(asset);
     }
 
 
@@ -130,18 +129,43 @@ public class AssetController {
         "'ASSET_MANAGER'" +
         ")"
     )
-    public ResponseEntity<String>
+        public ResponseEntity<IndustrialAsset>
     updateAsset(
             @PathVariable Long id,
             @RequestBody AssetRequestDto dto) {
 
-        assetService.updateAsset(
+        IndustrialAsset asset =
+            assetService.updateAsset(
                 id,
                 dto
-        );
+            );
+
+        return ResponseEntity.ok(asset);
+    }
+
+    @PatchMapping("/{id}/health")
+    @PreAuthorize(
+        "hasAnyRole(" +
+        "'SYSTEM_ADMIN'," +
+        "'ASSET_MANAGER'," +
+        "'MAINTENANCE_TECHNICIAN'" +
+        ")"
+    )
+    public ResponseEntity<IndustrialAsset>
+    updateHealth(
+            @PathVariable Long id,
+            @RequestBody AssetRequestDto dto) {
+
+        Integer health = dto == null
+                ? null
+                : dto.getCurrentHealth();
+
+        if (health == null || health < 0 || health > 100) {
+            return ResponseEntity.badRequest().build();
+        }
 
         return ResponseEntity.ok(
-                "Asset updated successfully."
+                assetService.updateHealth(id, health)
         );
     }
 
